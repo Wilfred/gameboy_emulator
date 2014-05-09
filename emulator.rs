@@ -13,8 +13,8 @@ struct CPU {
         e: Register,
         h: Register,
         l: Register,
-        // Flags register.
-        f: Register,
+
+        flags: Register,
 
         // Program state.
         pc: ProgramCounter,
@@ -25,19 +25,39 @@ struct CPU {
         t: Register,
 }
 
+static ZERO_FLAG: u8 = 0x80;
+static OPERATION_FLAG: u8 = 0x40;
+static HALF_CARRY_FLAG: u8 = 0x20;
+static CARRY_FLAG: u8 = 0x10;
+
+
 fn ADDr_e (cpu: &mut CPU) {
         //! Add E to A, leaving result in A (ADD A, E)
-        cpu.a += cpu.e;
+
+        // We use a larger temporary, so we can detect overflow.
+        let mut result: u16 = cpu.a as u16 + cpu.e as u16;
+
+        cpu.flags = 0;
+        if result == 0 {
+                cpu.flags |= ZERO_FLAG;
+        }
+        if result > 255 {
+                cpu.flags |= CARRY_FLAG;
+        }
+        
+        result = result & 255;
+        cpu.a = result as Register;
+
+        cpu.m = 1; cpu.t = 4;
 }
 
 fn main() {
         let mut cpu = CPU {
-                a: 0, b: 0, c: 0, d: 0, e: 5, h: 0,
-                l: 0, f: 0, pc: 0, sp: 0, m: 0, t: 0,
+                a: 254, b: 0, c: 0, d: 0, e: 2, h: 0,
+                l: 0, flags: 0, pc: 0, sp: 0, m: 0, t: 0,
         };
         println!("Initial CPU state: {}", cpu);
 
-        cpu.a += cpu.e;
-        // ADDr_e(&cpu);
+        ADDr_e(&mut cpu);
         println!("Final CPU state:   {}", cpu);
 }
