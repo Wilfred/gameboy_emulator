@@ -31,7 +31,7 @@ static HALF_CARRY_FLAG: u8 = 0x20;
 static CARRY_FLAG: u8 = 0x10;
 
 
-fn addr_e (cpu: &mut CPU) {
+fn addr_e(cpu: &mut CPU) {
     //! Add E to A, leaving result in A (ADD A, E)
 
     // We use a larger temporary, so we can detect overflow.
