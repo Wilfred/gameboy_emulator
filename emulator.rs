@@ -51,6 +51,11 @@ fn addr_e(cpu: &mut CPU) {
     cpu.m = 1; cpu.t = 4;
 }
 
+fn nop(cpu: &mut CPU) {
+    //! No-op, just update clock registers.
+    cpu.m = 1; cpu.t = 4;
+}
+
 fn main() {
     let mut cpu = CPU {
         a: 254, b: 0, c: 0, d: 0, e: 2, h: 0,
@@ -59,5 +64,6 @@ fn main() {
     println!("Initial CPU state: {:?}", cpu);
 
     addr_e(&mut cpu);
+    nop(&mut cpu);
     println!("Final CPU state:   {:?}", cpu);
 }
