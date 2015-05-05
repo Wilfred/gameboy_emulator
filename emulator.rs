@@ -3,7 +3,7 @@ type Register = u8;
 type ProgramCounter = u16;
 type StackPointer = u16;
 
-#[deriving(Show)]
+#[derive(Debug)]
 struct CPU {
         // Generic registers.
         a: Register,
@@ -31,7 +31,7 @@ static HALF_CARRY_FLAG: u8 = 0x20;
 static CARRY_FLAG: u8 = 0x10;
 
 
-fn ADDr_e (cpu: &mut CPU) {
+fn addr_e (cpu: &mut CPU) {
         //! Add E to A, leaving result in A (ADD A, E)
 
         // We use a larger temporary, so we can detect overflow.
@@ -56,8 +56,8 @@ fn main() {
                 a: 254, b: 0, c: 0, d: 0, e: 2, h: 0,
                 l: 0, flags: 0, pc: 0, sp: 0, m: 0, t: 0,
         };
-        println!("Initial CPU state: {}", cpu);
+        println!("Initial CPU state: {:?}", cpu);
 
-        ADDr_e(&mut cpu);
-        println!("Final CPU state:   {}", cpu);
+        addr_e(&mut cpu);
+        println!("Final CPU state:   {:?}", cpu);
 }
