@@ -1,4 +1,3 @@
 *.gb
 
-Cargo.lock
 target
