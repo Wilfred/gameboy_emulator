@@ -1,0 +1,5 @@
+[package]
+
+name = "gameboy_emulator"
+version = "0.0.1"
+authors = [ "Wilfred Hughes <me@wilfred.me.uk>" ]
