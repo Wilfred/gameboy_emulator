@@ -1,4 +1,4 @@
-# Gameboy Emulator
+# Gameboy Emulator [![Build Status](https://travis-ci.org/Wilfred/gameboy_emulator.svg?branch=master)](https://travis-ci.org/Wilfred/gameboy_emulator)
 
 OK, it's an excuse to play with Rust, based on
 [this GB emulation article](http://imrannazar.com/GameBoy-Emulation-in-JavaScript).
