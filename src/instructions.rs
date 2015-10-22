@@ -92,29 +92,3 @@ fn step_inc() {
 
     assert_eq!(cpu.a, 1);
 }
-
-static ZERO_FLAG: u8 = 0x80;
-static OPERATION_FLAG: u8 = 0x40;
-static HALF_CARRY_FLAG: u8 = 0x20;
-static CARRY_FLAG: u8 = 0x10;
-
-
-pub fn addr_e(cpu: &mut CPU) {
-    //! Add E to A, leaving result in A (ADD A, E)
-
-    // We use a larger temporary, so we can detect overflow.
-    let mut result: u16 = cpu.a as u16 + cpu.e as u16;
-
-    cpu.flags = 0;
-    if result == 0 {
-        cpu.flags |= ZERO_FLAG;
-    }
-    if result > 255 {
-        cpu.flags |= CARRY_FLAG;
-    }
-    
-    result = result & 255;
-    cpu.a = result as Register;
-
-    cpu.m = 1; cpu.t = 4;
-}

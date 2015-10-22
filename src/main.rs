@@ -7,7 +7,6 @@ fn main() {
     let mut cpu = initial_cpu();
     println!("Initial CPU state: {:?}", cpu);
 
-    addr_e(&mut cpu);
     step(&mut cpu, Instruction::Nop);
     println!("Final CPU state:   {:?}", cpu);
 }
