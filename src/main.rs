@@ -1,6 +1,6 @@
 mod instructions;
 
-use instructions::{initial_cpu,addr_e,nop};
+use instructions::*;
 
 #[cfg_attr(test, allow(dead_code))]
 fn main() {
@@ -8,6 +8,6 @@ fn main() {
     println!("Initial CPU state: {:?}", cpu);
 
     addr_e(&mut cpu);
-    nop(&mut cpu);
+    step(&mut cpu, Instruction::Nop);
     println!("Final CPU state:   {:?}", cpu);
 }
