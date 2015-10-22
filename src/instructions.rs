@@ -25,11 +25,27 @@ pub struct CPU {
     t: Register,
 }
 
+pub enum Instruction {
+    Nop
+}
+
 pub fn initial_cpu() -> CPU {
     CPU {
         a: 5, b: 0, c: 0, d: 0, e: 2, h: 0,
         l: 0, flags: 0, pc: 0, sp: 0, m: 0, t: 0,
     }
+}
+
+pub fn step(cpu: &mut CPU, i: Instruction) {
+    cpu.pc += 1;
+}
+
+#[test]
+fn step_nop() {
+    let mut cpu = initial_cpu();
+
+    step(&mut cpu, Instruction::Nop);
+    assert_eq!(cpu.pc, 1);
 }
 
 static ZERO_FLAG: u8 = 0x80;
