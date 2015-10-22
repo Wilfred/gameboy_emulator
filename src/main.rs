@@ -2,6 +2,7 @@ mod instructions;
 
 use instructions::{initial_cpu,addr_e,nop};
 
+#[cfg_attr(test, allow(dead_code))]
 fn main() {
     let mut cpu = initial_cpu();
     println!("Initial CPU state: {:?}", cpu);
