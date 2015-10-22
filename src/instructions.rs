@@ -1,8 +1,11 @@
+use std::num::Wrapping;
+
 use self::Instruction::*;
 use self::RegisterTarget::*;
 
 // The Z80 is an 8-bit chip.
-type Register = u8;
+type Register = Wrapping<u8>;
+// TODO: these should wrap.
 type ProgramCounter = u16;
 type StackPointer = u16;
 
@@ -47,23 +50,26 @@ pub enum Instruction {
 
 pub fn initial_cpu() -> CPU {
     CPU {
-        a: 0, b: 0, c: 0, d: 0, e: 2, h: 0,
-        l: 0, flags: 0, pc: 0, sp: 0, m: 0, t: 0,
+        a: Wrapping(0), b: Wrapping(0),
+        c: Wrapping(0), d: Wrapping(0),
+        e: Wrapping(0), h: Wrapping(0), l: Wrapping(0),
+        flags: Wrapping(0),
+        pc: 0, sp: 0, m: Wrapping(0), t: Wrapping(0),
     }
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) {
     cpu.pc += 1;
-    cpu.m = 1;
-    cpu.t = 4;
+    cpu.m = Wrapping(1);
+    cpu.t = Wrapping(4);
 
     match i {
         Nop => {}
         Increment(target) => {
             match target {
                 A => {
-                    // TODO: wrapping, flags
-                    cpu.a += 1;
+                    // TODO: flags
+                    cpu.a = cpu.a + Wrapping(1);
                 }
                 _ => unimplemented!()
             }
@@ -77,8 +83,8 @@ fn step_nop() {
 
     step(&mut cpu, Nop);
     assert_eq!(cpu.pc, 1);
-    assert_eq!(cpu.m, 1);
-    assert_eq!(cpu.t, 4);
+    assert_eq!(cpu.m, Wrapping(1));
+    assert_eq!(cpu.t, Wrapping(4));
 }
 
 #[test]
@@ -87,8 +93,17 @@ fn step_inc() {
 
     step(&mut cpu, Increment(A));
     assert_eq!(cpu.pc, 1);
-    assert_eq!(cpu.m, 1);
-    assert_eq!(cpu.t, 4);
+    assert_eq!(cpu.m, Wrapping(1));
+    assert_eq!(cpu.t, Wrapping(4));
 
-    assert_eq!(cpu.a, 1);
+    assert_eq!(cpu.a, Wrapping(1));
+}
+
+#[test]
+fn step_inc_wraps() {
+    let mut cpu = initial_cpu();
+    cpu.a = Wrapping(255);
+
+    step(&mut cpu, Increment(A));
+    assert_eq!(cpu.a, Wrapping(0));
 }
