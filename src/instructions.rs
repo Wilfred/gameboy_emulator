@@ -5,9 +5,10 @@ use self::Register8Target::*;
 
 // The Z80 is an 8-bit chip.
 type Register8 = Wrapping<u8>;
+type Register16 = Wrapping<u16>;
+
 // TODO: this should wrap.
 type ProgramCounter = u16;
-type StackPointer = Wrapping<u16>;
 
 #[derive(Debug)]
 pub struct CPU {
@@ -24,7 +25,7 @@ pub struct CPU {
 
     // Program state.
     pc: ProgramCounter,
-    sp: StackPointer,
+    sp: Register16,
 
     // Clock.
     m: Register8,
