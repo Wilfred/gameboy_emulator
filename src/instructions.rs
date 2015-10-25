@@ -117,12 +117,20 @@ pub fn decode(bytes: &[u8]) -> Instruction {
     }
 }
 
-/// Decode bytes as a little-endian 16-bit integer.
+/// Decode little-endian bytes as a 16-bit integer.
 fn decode_immediate16(bytes: &[u8]) -> u16 {
     let low_byte = bytes[0] as u16;
     let high_byte = bytes[1] as u16;
 
     (high_byte << 8) + low_byte
+}
+
+/// Separate immediate into high and low bytes.
+fn split_immediate16(i: u16) -> (u8, u8) {
+    let low_byte = i & 0x00FF;
+    let high_byte = i & 0xFF00;
+
+    (low_byte as u8, (high_byte >> 8) as u8)
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) {
@@ -144,7 +152,11 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
         Load16(SP, amount) => {
             cpu.sp = cpu.sp + Wrapping(amount);
         }
-        _ => unimplemented!(),
+        Load16(HL, amount) => {
+            let (low, high) = split_immediate16(amount);
+            cpu.h = Wrapping(high);
+            cpu.l = Wrapping(low);
+        }
     }
 }
 
@@ -223,4 +235,14 @@ fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let instr = decode(&bytes);
     assert_eq!(instr, Load16(HL, 0x9FFF));
+}
+
+#[test]
+fn execute_ld_hl() {
+    let bytes = [0x21, 0xFF, 0x9F];
+    let mut cpu = initial_cpu();
+
+    step(&mut cpu, decode(&bytes));
+    assert_eq!(cpu.h, Wrapping(0x9F));
+    assert_eq!(cpu.l, Wrapping(0xFF));
 }
