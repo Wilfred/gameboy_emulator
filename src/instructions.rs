@@ -5,9 +5,9 @@ use self::RegisterTarget::*;
 
 // The Z80 is an 8-bit chip.
 type Register = Wrapping<u8>;
-// TODO: these should wrap.
+// TODO: this should wrap.
 type ProgramCounter = u16;
-type StackPointer = u16;
+type StackPointer = Wrapping<u16>;
 
 #[derive(Debug)]
 pub struct CPU {
@@ -56,7 +56,8 @@ pub fn initial_cpu() -> CPU {
         c: Wrapping(0), d: Wrapping(0),
         e: Wrapping(0), h: Wrapping(0), l: Wrapping(0),
         flags: Wrapping(0),
-        pc: 0, sp: 0, m: Wrapping(0), t: Wrapping(0),
+        pc: 0, sp: Wrapping(0),
+        m: Wrapping(0), t: Wrapping(0),
     }
 }
 
