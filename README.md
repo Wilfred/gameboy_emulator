@@ -7,6 +7,7 @@ References:
 
 * [GameBoy Emulation in JavaScript](http://imrannazar.com/GameBoy-Emulation-in-JavaScript)
 * [Opcode map](http://imrannazar.com/Gameboy-Z80-Opcode-Map)
+* [Programming the Z80](http://www.z80.info/zaks.html)
 
 License: GPL v2 or later.
 
