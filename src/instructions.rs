@@ -112,6 +112,9 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
 
     match i {
         Nop => {}
+        Xor8(register_name) => {
+            cpu.a = cpu.a ^ *register8(cpu, register_name);
+        }
         Increment(target) => {
             // TODO: flags
             let mut reg = register8(cpu, target);
@@ -182,6 +185,16 @@ fn decode_xor() {
     let bytes = [0xAF];
     let instr = decode(&bytes);
     assert_eq!(instr, Xor8(A));
+}
+
+#[test]
+fn step_xor_a() {
+    let bytes = [0xAF];
+    let mut cpu = initial_cpu();
+    cpu.a = Wrapping(5);
+
+    step(&mut cpu, decode(&bytes));
+    assert_eq!(cpu.a, Wrapping(0));
 }
 
 #[test]
