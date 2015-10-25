@@ -1,9 +1,12 @@
-# Gameboy Emulator [![Build Status](https://travis-ci.org/Wilfred/gameboy_emulator.svg?branch=master)](https://travis-ci.org/Wilfred/gameboy_emulator)
+# Gameboy Emulator
+[![Build Status](https://travis-ci.org/Wilfred/gameboy_emulator.svg?branch=master)](https://travis-ci.org/Wilfred/gameboy_emulator)
 
-OK, it's an excuse to play with Rust, based on
-[this GB emulation article](http://imrannazar.com/GameBoy-Emulation-in-JavaScript).
+A basic gameboy emulator in Rust. Nothing works yet.
 
-Current status: Not even alpha.
+References:
+
+* [GameBoy Emulation in JavaScript](http://imrannazar.com/GameBoy-Emulation-in-JavaScript)
+* [Opcode map](http://imrannazar.com/Gameboy-Z80-Opcode-Map)
 
 License: GPL v2 or later.
 
