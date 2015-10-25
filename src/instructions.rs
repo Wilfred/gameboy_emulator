@@ -53,6 +53,7 @@ pub enum Register16Target {
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
+    Xor8(Register8Target),
     Load(Register16Target,u16),
     Increment(Register8Target),
 }
@@ -89,6 +90,9 @@ pub fn decode(bytes: &[u8]) -> Instruction {
         0x31 => {
             Load(SP, decode_immediate16(&bytes[1..]))
         }
+        0xAF => {
+            Xor8(A)
+        }
         _ => unimplemented!()
     }
 }
@@ -116,6 +120,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
         Load(SP,amount) => {
             cpu.sp = cpu.sp + Wrapping(amount);
         }
+        _ => unimplemented!()
     }
 }
 
@@ -171,3 +176,11 @@ fn load_sp_immediate() {
     step(&mut cpu, decode(&bytes));
     assert_eq!(cpu.sp, Wrapping(0xFFFE));
 }
+
+#[test]
+fn decode_xor() {
+    let bytes = [0xAF];
+    let instr = decode(&bytes);
+    assert_eq!(instr, Xor8(A));
+}
+
