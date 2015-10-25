@@ -1,10 +1,10 @@
 use std::num::Wrapping;
 
 use self::Instruction::*;
-use self::RegisterTarget::*;
+use self::Register8Target::*;
 
 // The Z80 is an 8-bit chip.
-type Register = Wrapping<u8>;
+type Register8 = Wrapping<u8>;
 // TODO: this should wrap.
 type ProgramCounter = u16;
 type StackPointer = Wrapping<u16>;
@@ -12,43 +12,43 @@ type StackPointer = Wrapping<u16>;
 #[derive(Debug)]
 pub struct CPU {
     // Generic registers.
-    a: Register,
-    b: Register,
-    c: Register,
-    d: Register,
-    e: Register,
-    h: Register,
-    l: Register,
+    a: Register8,
+    b: Register8,
+    c: Register8,
+    d: Register8,
+    e: Register8,
+    h: Register8,
+    l: Register8,
 
-    flags: Register,
+    flags: Register8,
 
     // Program state.
     pc: ProgramCounter,
     sp: StackPointer,
 
     // Clock.
-    m: Register,
-    t: Register,
+    m: Register8,
+    t: Register8,
 }
 
 #[derive(Debug,PartialEq,Eq)]
-pub enum RegisterTarget {
+pub enum Register8Target {
     A,
     B,
     C,
     D,
     E,
     H,
-    L,
-    // TODO: BC, DE, HL, (HL)
-    SP
+    L
+    // TODO: BC, DE, HL, (HL), SP
 }
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
     Load(RegisterTarget,u16),
-    Increment(RegisterTarget),
+    // Load(RegisterTarget,u16),
+    Increment(Register8Target),
 }
 
 pub fn initial_cpu() -> CPU {
