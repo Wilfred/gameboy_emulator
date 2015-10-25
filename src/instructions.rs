@@ -133,7 +133,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
     match i {
         Nop => {}
         Xor8(register_name) => {
-            let mut register_value = *register8(cpu, register_name);
+            let register_value = *register8(cpu, register_name);
             cpu.a = cpu.a ^ register_value;
         }
         Increment(target) => {
