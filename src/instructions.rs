@@ -60,6 +60,15 @@ pub fn initial_cpu() -> CPU {
     }
 }
 
+pub fn decode(byte: i8) -> Instruction {
+    match byte {
+        0 => {
+            Nop
+        }
+        _ => unimplemented!()
+    }
+}
+
 pub fn step(cpu: &mut CPU, i: Instruction) {
     cpu.pc += 1;
     cpu.m = Wrapping(1);
@@ -77,6 +86,13 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             }
         }
     }
+}
+
+#[test]
+fn decode_nop() {
+    let byte = 0;
+
+    assert_eq!(decode(byte), Nop);
 }
 
 #[test]
