@@ -1,12 +1,8 @@
 use std::num::Wrapping;
 
 use self::Instruction::*;
-use self::Register8Target::*;
-use self::Register16Target::*;
-
-// The Z80 is an 8-bit chip.
-type Register8 = Wrapping<u8>;
-type Register16 = Wrapping<u16>;
+use self::Register8::*;
+use self::Register16::*;
 
 // TODO: this should wrap.
 type ProgramCounter = u16;
@@ -14,27 +10,27 @@ type ProgramCounter = u16;
 #[derive(Debug)]
 pub struct CPU {
     // Generic registers.
-    a: Register8,
-    b: Register8,
-    c: Register8,
-    d: Register8,
-    e: Register8,
-    h: Register8,
-    l: Register8,
+    a: Wrapping<u8>,
+    b: Wrapping<u8>,
+    c: Wrapping<u8>,
+    d: Wrapping<u8>,
+    e: Wrapping<u8>,
+    h: Wrapping<u8>,
+    l: Wrapping<u8>,
 
-    flags: Register8,
+    flags: Wrapping<u8>,
 
     // Program state.
     pc: ProgramCounter,
-    sp: Register16,
+    sp: Wrapping<u16>,
 
     // Clock.
-    m: Register8,
-    t: Register8,
+    m: Wrapping<u8>,
+    t: Wrapping<u8>,
 }
 
 #[derive(Debug,PartialEq,Eq)]
-pub enum Register8Target {
+pub enum Register8 {
     A,
     B,
     C,
@@ -45,7 +41,7 @@ pub enum Register8Target {
 }
 
 #[derive(Debug,PartialEq,Eq)]
-pub enum Register16Target {
+pub enum Register16 {
     // TODO: BC, DE, HL, (HL), SP
     SP
 }
@@ -53,9 +49,9 @@ pub enum Register16Target {
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
-    Xor8(Register8Target),
-    Load(Register16Target,u16),
-    Increment(Register8Target),
+    Xor8(Register8),
+    Load(Register16,u16),
+    Increment(Register8),
 }
 
 pub fn initial_cpu() -> CPU {
@@ -70,7 +66,7 @@ pub fn initial_cpu() -> CPU {
 }
 
 // Get a mutable reference to targeted register.
-fn register8(cpu: &mut CPU, target: Register8Target) -> &mut Register8 {
+fn register8(cpu: &mut CPU, target: Register8) -> &mut Wrapping<u8> {
     match target {
         A => { &mut cpu.a }
         B => { &mut cpu.b }
