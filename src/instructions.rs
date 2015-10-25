@@ -60,8 +60,8 @@ pub fn initial_cpu() -> CPU {
     }
 }
 
-pub fn decode(byte: i8) -> Instruction {
-    match byte {
+pub fn decode(byte: &[i8]) -> Instruction {
+    match byte[0] {
         0 => {
             Nop
         }
@@ -90,9 +90,8 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
 
 #[test]
 fn decode_nop() {
-    let byte = 0;
-
-    assert_eq!(decode(byte), Nop);
+    let bytes = [0x00];
+    assert_eq!(decode(&bytes), Nop);
 }
 
 #[test]
