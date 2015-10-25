@@ -31,6 +31,7 @@ pub struct CPU {
     t: Register,
 }
 
+#[derive(Debug,PartialEq,Eq)]
 pub enum RegisterTarget {
     A,
     B,
@@ -43,6 +44,7 @@ pub enum RegisterTarget {
     SP
 }
 
+#[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
     Increment(RegisterTarget),
