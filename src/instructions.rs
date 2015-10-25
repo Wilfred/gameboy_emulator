@@ -47,6 +47,7 @@ pub enum RegisterTarget {
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
+    Load(RegisterTarget,u16),
     Increment(RegisterTarget),
 }
 
@@ -61,13 +62,24 @@ pub fn initial_cpu() -> CPU {
     }
 }
 
-pub fn decode(byte: &[i8]) -> Instruction {
-    match byte[0] {
-        0 => {
+pub fn decode(bytes: &[u8]) -> Instruction {
+    match bytes[0] {
+        0x00 => {
             Nop
+        }
+        0x31 => {
+            Load(SP, decode_immediate16(&bytes[1..]))
         }
         _ => unimplemented!()
     }
+}
+
+/// Decode bytes as a little-endian 16-bit integer.
+fn decode_immediate16(bytes: &[u8]) -> u16 {
+    let low_byte = bytes[0] as u16;
+    let high_byte = bytes[1] as u16;
+
+    (high_byte << 8) + low_byte
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) {
@@ -86,6 +98,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
                 _ => unimplemented!()
             }
         }
+        _ => unimplemented!()
     }
 }
 
@@ -125,3 +138,11 @@ fn step_inc_wraps() {
     step(&mut cpu, Increment(A));
     assert_eq!(cpu.a, Wrapping(0));
 }
+
+#[test]
+fn decode_sp_immediate() {
+    let bytes = [0x31, 0xFE, 0xFF];
+    let instr = decode(&bytes);
+    assert_eq!(instr, Load(SP, 0xFFFE));
+}
+
