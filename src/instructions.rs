@@ -51,7 +51,7 @@ pub enum Register16 {
 pub enum Instruction {
     Nop,
     Xor8(Register8),
-    Load(Register16, u16),
+    Load16(Register16, u16),
     Increment(Register8),
 }
 
@@ -105,10 +105,10 @@ pub fn decode(bytes: &[u8]) -> Instruction {
             Nop
         }
         0x21 => {
-            Load(HL, decode_immediate16(&bytes[1..]))
+            Load16(HL, decode_immediate16(&bytes[1..]))
         }
         0x31 => {
-            Load(SP, decode_immediate16(&bytes[1..]))
+            Load16(SP, decode_immediate16(&bytes[1..]))
         }
         0xAF => {
             Xor8(A)
@@ -141,7 +141,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
         }
-        Load(SP, amount) => {
+        Load16(SP, amount) => {
             cpu.sp = cpu.sp + Wrapping(amount);
         }
         _ => unimplemented!(),
@@ -189,7 +189,7 @@ fn step_inc_wraps() {
 fn decode_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
     let instr = decode(&bytes);
-    assert_eq!(instr, Load(SP, 0xFFFE));
+    assert_eq!(instr, Load16(SP, 0xFFFE));
 }
 
 #[test]
@@ -222,5 +222,5 @@ fn step_xor_a() {
 fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let instr = decode(&bytes);
-    assert_eq!(instr, Load(HL, 0x9FFF));
+    assert_eq!(instr, Load16(HL, 0x9FFF));
 }
