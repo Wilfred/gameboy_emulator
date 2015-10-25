@@ -37,45 +37,65 @@ pub enum Register8 {
     D,
     E,
     H,
-    L
+    L,
 }
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum Register16 {
     // TODO: BC, DE, (HL), SP
     HL,
-    SP
+    SP,
 }
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
     Xor8(Register8),
-    Load(Register16,u16),
+    Load(Register16, u16),
     Increment(Register8),
 }
 
 pub fn initial_cpu() -> CPU {
     CPU {
-        a: Wrapping(0), b: Wrapping(0),
-        c: Wrapping(0), d: Wrapping(0),
-        e: Wrapping(0), h: Wrapping(0), l: Wrapping(0),
+        a: Wrapping(0),
+        b: Wrapping(0),
+        c: Wrapping(0),
+        d: Wrapping(0),
+        e: Wrapping(0),
+        h: Wrapping(0),
+        l: Wrapping(0),
         flags: Wrapping(0),
-        pc: 0, sp: Wrapping(0),
-        m: Wrapping(0), t: Wrapping(0),
+        pc: 0,
+        sp: Wrapping(0),
+        m: Wrapping(0),
+        t: Wrapping(0),
     }
 }
 
 // Get a mutable reference to targeted register.
 fn register8(cpu: &mut CPU, target: Register8) -> &mut Wrapping<u8> {
     match target {
-        A => { &mut cpu.a }
-        B => { &mut cpu.b }
-        C => { &mut cpu.c }
-        D => { &mut cpu.d }
-        E => { &mut cpu.e }
-        H => { &mut cpu.h }
-        L => { &mut cpu.l }
+        A => {
+            &mut cpu.a
+        }
+        B => {
+            &mut cpu.b
+        }
+        C => {
+            &mut cpu.c
+        }
+        D => {
+            &mut cpu.d
+        }
+        E => {
+            &mut cpu.e
+        }
+        H => {
+            &mut cpu.h
+        }
+        L => {
+            &mut cpu.l
+        }
     }
 }
 
@@ -93,7 +113,7 @@ pub fn decode(bytes: &[u8]) -> Instruction {
         0xAF => {
             Xor8(A)
         }
-        _ => unimplemented!()
+        _ => unimplemented!(),
     }
 }
 
@@ -120,10 +140,10 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
         }
-        Load(SP,amount) => {
+        Load(SP, amount) => {
             cpu.sp = cpu.sp + Wrapping(amount);
         }
-        _ => unimplemented!()
+        _ => unimplemented!(),
     }
 }
 
@@ -201,6 +221,5 @@ fn step_xor_a() {
 fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let instr = decode(&bytes);
-    assert_eq!(instr, Load(HL,0x9FFF));
+    assert_eq!(instr, Load(HL, 0x9FFF));
 }
-
