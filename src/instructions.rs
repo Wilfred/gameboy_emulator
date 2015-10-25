@@ -63,6 +63,19 @@ pub fn initial_cpu() -> CPU {
     }
 }
 
+// Get a mutable reference to targeted register.
+fn register8(cpu: &mut CPU, target: Register8Target) -> &mut Register8 {
+    match target {
+        A => { &mut cpu.a }
+        B => { &mut cpu.b }
+        C => { &mut cpu.c }
+        D => { &mut cpu.d }
+        E => { &mut cpu.e }
+        H => { &mut cpu.h }
+        L => { &mut cpu.l }
+    }
+}
+
 pub fn decode(bytes: &[u8]) -> Instruction {
     match bytes[0] {
         0x00 => {
@@ -91,13 +104,9 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
     match i {
         Nop => {}
         Increment(target) => {
-            match target {
-                A => {
-                    // TODO: flags
-                    cpu.a = cpu.a + Wrapping(1);
-                }
-                _ => unimplemented!()
-            }
+            // TODO: flags
+            let mut reg = register8(cpu, target);
+            *reg = *reg + Wrapping(1);
         }
         Load(SP,amount) => {
             cpu.sp = cpu.sp + Wrapping(amount);
