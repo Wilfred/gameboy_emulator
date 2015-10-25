@@ -11,6 +11,7 @@ References:
 * [Gameboy Development](https://slashbinbash.wordpress.com/2013/09/10/gameboy-development/)
 * [Everything You Always Wanted To Know About GAMEBOY but were afraid to ask](http://www.opusgames.com/games/GBDev/zips/Gbspec.txt)
 * [ASMSchool](http://gameboy.mongenel.com/asmschool.html)
+* [Z80 tools](http://www.z80.info/z80sdt.htm) (disassemblers etc)
 
 License: GPL v2 or later.
 
