@@ -42,7 +42,8 @@ pub enum Register8 {
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum Register16 {
-    // TODO: BC, DE, HL, (HL), SP
+    // TODO: BC, DE, (HL), SP
+    HL,
     SP
 }
 
@@ -82,6 +83,9 @@ pub fn decode(bytes: &[u8]) -> Instruction {
     match bytes[0] {
         0x00 => {
             Nop
+        }
+        0x21 => {
+            Load(HL, decode_immediate16(&bytes[1..]))
         }
         0x31 => {
             Load(SP, decode_immediate16(&bytes[1..]))
@@ -178,5 +182,12 @@ fn decode_xor() {
     let bytes = [0xAF];
     let instr = decode(&bytes);
     assert_eq!(instr, Xor8(A));
+}
+
+#[test]
+fn decode_ld_hl() {
+    let bytes = [0x21, 0xFF, 0x9F];
+    let instr = decode(&bytes);
+    assert_eq!(instr, Load(HL,0x9FFF));
 }
 
