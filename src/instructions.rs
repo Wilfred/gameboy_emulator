@@ -98,7 +98,10 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
                 _ => unimplemented!()
             }
         }
-        _ => unimplemented!()
+        Load(SP,amount) => {
+            cpu.sp = cpu.sp + Wrapping(amount);
+        }
+        Load(_, _) => unimplemented!()
     }
 }
 
@@ -146,3 +149,11 @@ fn decode_sp_immediate() {
     assert_eq!(instr, Load(SP, 0xFFFE));
 }
 
+#[test]
+fn load_sp_immediate() {
+    let bytes = [0x31, 0xFE, 0xFF];
+    let mut cpu = initial_cpu();
+
+    step(&mut cpu, decode(&bytes));
+    assert_eq!(cpu.sp, Wrapping(0xFFFE));
+}
