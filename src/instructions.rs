@@ -2,6 +2,7 @@ use std::num::Wrapping;
 
 use self::Instruction::*;
 use self::Register8Target::*;
+use self::Register16Target::*;
 
 // The Z80 is an 8-bit chip.
 type Register8 = Wrapping<u8>;
@@ -41,14 +42,18 @@ pub enum Register8Target {
     E,
     H,
     L
+}
+
+#[derive(Debug,PartialEq,Eq)]
+pub enum Register16Target {
     // TODO: BC, DE, HL, (HL), SP
+    SP
 }
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
-    Load(RegisterTarget,u16),
-    // Load(RegisterTarget,u16),
+    Load(Register16Target,u16),
     Increment(Register8Target),
 }
 
@@ -111,7 +116,6 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
         Load(SP,amount) => {
             cpu.sp = cpu.sp + Wrapping(amount);
         }
-        Load(_, _) => unimplemented!()
     }
 }
 
