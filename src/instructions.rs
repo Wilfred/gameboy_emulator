@@ -99,8 +99,9 @@ fn register8(cpu: &mut CPU, target: Register8) -> &mut Wrapping<u8> {
     }
 }
 
-pub fn decode(bytes: &[u8]) -> Instruction {
-    match bytes[0] {
+// Given a position in a byte array, return the instruction at that point.
+pub fn decode(bytes: &[u8], offset: usize) -> Instruction {
+    match bytes[offset] {
         0x00 => {
             Nop
         }
@@ -163,7 +164,14 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
 #[test]
 fn decode_nop() {
     let bytes = [0x00];
-    assert_eq!(decode(&bytes), Nop);
+    assert_eq!(decode(&bytes, 0), Nop);
+}
+
+#[test]
+fn decode_offset() {
+    let bytes = [0xAF, 0x00];
+    let instr = decode(&bytes, 1);
+    assert_eq!(instr, Nop);
 }
 
 #[test]
@@ -200,7 +208,7 @@ fn step_inc_wraps() {
 #[test]
 fn decode_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
-    let instr = decode(&bytes);
+    let instr = decode(&bytes, 0);
     assert_eq!(instr, Load16(SP, 0xFFFE));
 }
 
@@ -209,14 +217,14 @@ fn load_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
     let mut cpu = initial_cpu();
 
-    step(&mut cpu, decode(&bytes));
+    step(&mut cpu, decode(&bytes, 0));
     assert_eq!(cpu.sp, Wrapping(0xFFFE));
 }
 
 #[test]
 fn decode_xor() {
     let bytes = [0xAF];
-    let instr = decode(&bytes);
+    let instr = decode(&bytes, 0);
     assert_eq!(instr, Xor8(A));
 }
 
@@ -226,14 +234,14 @@ fn step_xor_a() {
     let mut cpu = initial_cpu();
     cpu.a = Wrapping(5);
 
-    step(&mut cpu, decode(&bytes));
+    step(&mut cpu, decode(&bytes, 0));
     assert_eq!(cpu.a, Wrapping(0));
 }
 
 #[test]
 fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
-    let instr = decode(&bytes);
+    let instr = decode(&bytes, 0);
     assert_eq!(instr, Load16(HL, 0x9FFF));
 }
 
@@ -242,7 +250,7 @@ fn execute_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let mut cpu = initial_cpu();
 
-    step(&mut cpu, decode(&bytes));
+    step(&mut cpu, decode(&bytes, 0));
     assert_eq!(cpu.h, Wrapping(0x9F));
     assert_eq!(cpu.l, Wrapping(0xFF));
 }
