@@ -14,20 +14,28 @@ fn read_bytes(path: &str) -> Result<Vec<u8>, std::io::Error> {
 }
 
 fn print_instrs(bytes: &[u8]) {
-    println!("OFFSET BYTES INSTR");
+    println!("OFFSET BYTES     INSTR");
 
     let mut offset = 0;
     while offset < bytes.len() {
         let instr = decode(bytes, offset);
+        let byte_count = instr.as_ref().map(instr_size).unwrap_or(1);
 
-        let byte = bytes[offset];
+        // Build up a string of bytes for this instr e.g. "FF 00"
+        let mut bytes_repr = format!("{:02X}", bytes[offset]);
+        for i in 1..byte_count {
+            bytes_repr = format!("{} {:02X}", bytes_repr, bytes[offset+i]);
+        }
+        bytes_repr = format!("{:<9}", bytes_repr);
+
+        // Textual representation of the decode instuction.
         let instr_repr = match &instr {
             &Some(ref instr) => format!("{:?}", instr),
             &None => "???".to_owned()
         };
-        println!("{:04X}   {:02X} {}", offset, byte, instr_repr);
 
-        offset += instr.as_ref().map(instr_size).unwrap_or(1);
+        println!("{:04X}   {} {}", offset, bytes_repr, instr_repr);
+        offset += byte_count;
     }
 }
 
