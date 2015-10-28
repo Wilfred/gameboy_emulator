@@ -13,6 +13,14 @@ fn read_bytes(path: &str) -> Result<Vec<u8>, std::io::Error> {
     Ok(bytes)
 }
 
+fn print_instrs(bytes: &[u8]) {
+    println!("OFFSET BYTE");
+
+    for (offset, byte) in bytes.iter().enumerate() {
+        println!("{:X}      0x{:X}", offset, byte);
+    }
+}
+
 #[cfg_attr(test, allow(dead_code))]
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -21,7 +29,7 @@ fn main() {
         let path = &args[1];
         match read_bytes(path) {
             Ok(bytes) => {
-                println!("Read {:?} bytes", bytes.len());
+                print_instrs(&bytes[..]);
             }
             Err(_) => {
                 println!("Could not read file: {}", path);
