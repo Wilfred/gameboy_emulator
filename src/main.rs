@@ -17,7 +17,7 @@ fn print_instrs(bytes: &[u8]) {
     println!("OFFSET BYTE");
 
     for (offset, byte) in bytes.iter().enumerate() {
-        println!("{:X}      0x{:X}", offset, byte);
+        println!("{:04X}   0x{:X}", offset, byte);
     }
 }
 
@@ -36,7 +36,6 @@ fn main() {
                 std::process::exit(1);
             }
         }
-        println!("path {:?}", path);
     } else {
         println!("DEMO MODE");
         let mut cpu = initial_cpu();
