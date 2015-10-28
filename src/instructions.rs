@@ -118,6 +118,16 @@ pub fn decode(bytes: &[u8], offset: usize) -> Instruction {
     }
 }
 
+/// Given an instruction, return its size in bytes.
+pub fn instr_size(instr: &Instruction) -> usize {
+    match *instr {
+        Nop => 1,
+        Xor8(_) => 1,
+        Increment(_) => 1,
+        Load16(_, _) => 3,
+    }
+}
+
 /// Decode little-endian bytes as a 16-bit integer.
 fn decode_immediate16(bytes: &[u8]) -> u16 {
     let low_byte = bytes[0] as u16;
