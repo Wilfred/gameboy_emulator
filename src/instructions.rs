@@ -63,10 +63,10 @@ impl fmt::Debug for Value {
                 write!(f, "({:?})", r)
             }
             Value::Immediate16(v) => {
-                write!(f, "${:?}", v)
+                write!(f, "${:X}", v)
             }
             Value::Immediate8(v) => {
-                write!(f, "${:?}", v)
+                write!(f, "${:X}", v)
             }
         }
     }
