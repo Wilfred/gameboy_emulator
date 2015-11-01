@@ -166,6 +166,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                 Value::MemoryAddress(HL),
                 Value::Register8(A)))
         }
+        0x3E => {
+            Some(Load(Value::Register8(A), Value::Immediate8(bytes[offset + 1])))
+        }
         0xAF => {
             Some(Xor8(A))
         }
@@ -346,6 +349,14 @@ fn decode_ld_c() {
     let instr = decode(&bytes, 0).unwrap();
 
     assert_eq!(instr, Load(Value::Register8(C), Value::Immediate8(0x11)));
+}
+
+#[test]
+fn decode_ld_a() {
+    let bytes = [0x3E, 0x80];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, Load(Value::Register8(A), Value::Immediate8(0x80)));
 }
 
 #[test]
