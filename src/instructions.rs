@@ -146,7 +146,8 @@ fn register8(cpu: &mut CPU, target: Register8) -> &mut Wrapping<u8> {
     }
 }
 
-// Given a position in a byte array, return the instruction at that point.
+/// Given a position in a byte array, return the instruction at that
+/// point. Based on http://imrannazar.com/Gameboy-Z80-Opcode-Map .
 pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
     match bytes[offset] {
         0x00 => {
@@ -176,6 +177,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x3E => {
             Some(Load(Value::Register8(A), Value::Immediate8(bytes[offset + 1])))
         }
+        0x77 => {
+            Some(Load(Value::MemoryAddress(HL), Value::Register8(A)))
+        }
         0xAF => {
             Some(Xor8(A))
         }
@@ -202,11 +206,11 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Nop => 1,
         Xor8(_) => 1,
         Increment(_) => 1,
-        Load(ref target, _) => {
-            match *target {
-                Value::MemoryAddressWithOffset(_, _) => 1,
-                Value::Register8(_) => 2,
-                _ => 3
+        Load(_, ref src) => {
+            match *src {
+                Value::Immediate16(_) => 3,
+                Value::Immediate8(_) => 2,
+                _ => 1
             }
         },
         LoadDecrement(_, _) => 1,
@@ -389,6 +393,14 @@ fn decode_inc_c() {
 }
 
 #[test]
+fn decode_ld_rel_hl() {
+    let bytes = [0x77];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, Load(Value::MemoryAddress(HL), Value::Register8(A)));
+}
+
+#[test]
 fn ld_size() {
     let instr = Load(Value::Register8(A), Value::Immediate8(1));
     assert_eq!(instr_size(&instr), 2);
@@ -400,4 +412,6 @@ fn ld_size() {
                      Value::Register8(A));
     assert_eq!(instr_size(&instr), 1);
 
+    let instr = Load(Value::MemoryAddress(HL), Value::Register8(A));
+    assert_eq!(instr_size(&instr), 1);
 }
