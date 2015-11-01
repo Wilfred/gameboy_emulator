@@ -47,6 +47,7 @@ pub enum Value {
     Register8(Register8),
     MemoryAddress(Register16),
     Immediate16(u16),
+    Immediate8(u8),
 }
 
 impl fmt::Debug for Value {
@@ -62,7 +63,10 @@ impl fmt::Debug for Value {
                 write!(f, "({:?})", r)
             }
             Value::Immediate16(v) => {
-                write!(f, "{:?}", v)
+                write!(f, "${:?}", v)
+            }
+            Value::Immediate8(v) => {
+                write!(f, "${:?}", v)
             }
         }
     }
@@ -143,6 +147,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
     match bytes[offset] {
         0x00 => {
             Some(Nop)
+        }
+        0x0E => {
+            Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
         }
         0x20 => {
             let addr_offset = bytes[offset+1] as i8;
@@ -334,4 +341,12 @@ fn decode_jr_nz() {
     let instr = decode(&bytes, 0).unwrap();
 
     assert_eq!(instr, JumpRelative(Condition::NonZero, -5));
+}
+
+#[test]
+fn decode_ld_c() {
+    let bytes = [0x0E, 0x11];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, Load(Value::Register8(C), Value::Immediate8(0x11)));
 }
