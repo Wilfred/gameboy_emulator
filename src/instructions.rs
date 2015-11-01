@@ -63,6 +63,8 @@ pub enum Instruction {
     Load16(Register16, u16),
     LoadDecrement(Value, Value),
     Increment(Register8),
+    // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
+    Bit(u8, Value),
 }
 
 pub fn initial_cpu() -> CPU {
@@ -129,6 +131,15 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0xAF => {
             Some(Xor8(A))
         }
+        // 0xCB is the prefix for two byte instructions.
+        0xCB => {
+            match bytes[offset+1] {
+                0x7C => {
+                    Some(Bit(7, Value::Register8(H)))
+                }
+                _ => unimplemented!()
+            }
+        }
         _ => None
     }
 }
@@ -141,6 +152,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Increment(_) => 1,
         Load16(_, _) => 3,
         LoadDecrement(_, _) => 1,
+        Bit(_, _) => 2,
     }
 }
 
@@ -290,4 +302,12 @@ fn decode_ldd_hl_a() {
     assert_eq!(instr, LoadDecrement(
         Value::MemoryAddress(HL),
         Value::Register8(A)));
+}
+
+#[test]
+fn decode_bit_7_h() {
+    let bytes = [0xCB, 0x7C];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, Bit(7, Value::Register8(H)));
 }
