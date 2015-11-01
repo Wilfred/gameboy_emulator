@@ -54,6 +54,11 @@ pub enum Register16 {
     SP,
 }
 
+#[derive(Debug,PartialEq,Eq)]
+pub enum Condition {
+    NonZero,
+}
+
 // The main enum for Z80 instructions. Note that we assume intel
 // conventions, so the destination comes *before* the source.
 #[derive(Debug,PartialEq,Eq)]
@@ -65,6 +70,7 @@ pub enum Instruction {
     Increment(Register8),
     // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
     Bit(u8, Value),
+    JumpRelative(Condition, i8),
 }
 
 pub fn initial_cpu() -> CPU {
@@ -117,6 +123,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x00 => {
             Some(Nop)
         }
+        0x20 => {
+            let addr_offset = bytes[offset+1] as i8;
+            Some(JumpRelative(Condition::NonZero, addr_offset))
+        }
         0x21 => {
             Some(Load16(HL, decode_immediate16(&bytes[1..])))
         }
@@ -153,6 +163,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Load16(_, _) => 3,
         LoadDecrement(_, _) => 1,
         Bit(_, _) => 2,
+        JumpRelative(_, _) => 2,
     }
 }
 
@@ -310,4 +321,12 @@ fn decode_bit_7_h() {
     let instr = decode(&bytes, 0).unwrap();
 
     assert_eq!(instr, Bit(7, Value::Register8(H)));
+}
+
+#[test]
+fn decode_jr_nz() {
+    let bytes = [0x20, 0xFB];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, JumpRelative(Condition::NonZero, -5));
 }
