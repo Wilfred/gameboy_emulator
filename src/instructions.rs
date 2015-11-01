@@ -188,7 +188,12 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Nop => 1,
         Xor8(_) => 1,
         Increment(_) => 1,
-        Load(_, _) => 3,
+        Load(ref reg, _) => {
+            match *reg {
+                Value::Register8(_) => 2,
+                _ => 3
+            }
+        },
         LoadDecrement(_, _) => 1,
         Bit(_, _) => 2,
         JumpRelative(_, _) => 2,
@@ -341,4 +346,13 @@ fn decode_ld_c() {
     let instr = decode(&bytes, 0).unwrap();
 
     assert_eq!(instr, Load(Value::Register8(C), Value::Immediate8(0x11)));
+}
+
+#[test]
+fn ld_size() {
+    let instr = Load(Value::Register8(A), Value::Immediate8(1));
+    assert_eq!(instr_size(&instr), 2);
+
+    let instr = Load(Value::Register16(HL), Value::Immediate16(1));
+    assert_eq!(instr_size(&instr), 3);
 }
