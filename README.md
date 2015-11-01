@@ -1,7 +1,7 @@
 # Gameboy Emulator
 [![Build Status](https://travis-ci.org/Wilfred/gameboy_emulator.svg?branch=master)](https://travis-ci.org/Wilfred/gameboy_emulator)
 
-A basic gameboy emulator in Rust. Nothing works yet.
+A basic gameboy emulator in Rust. Currently, it's just a disassembler.
 
 References:
 
@@ -21,8 +21,8 @@ License: GPL v2 or later.
 $ cargo build
 ```
 
-You can compile and run in one go:
+Usage as a disassembler:
 
 ```bash
-$ cargo run
+$ cargo run /path/to/foo.gb
 ```
