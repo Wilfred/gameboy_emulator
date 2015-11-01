@@ -152,6 +152,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x00 => {
             Some(Nop)
         }
+        0x0C => {
+            Some(Increment(C))
+        }
         0x0E => {
             Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
         }
@@ -375,6 +378,14 @@ fn decode_ld_mem_offset() {
 
     assert_eq!(instr, Load(Value::MemoryAddressWithOffset(C, 0xFF00),
                            Value::Register8(A)));
+}
+
+#[test]
+fn decode_inc_c() {
+    let bytes = [0x0C];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, Increment(C));
 }
 
 #[test]
