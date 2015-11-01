@@ -65,7 +65,7 @@ pub enum Condition {
 pub enum Instruction {
     Nop,
     Xor8(Register8),
-    Load16(Register16, u16),
+    Load(Value, u16),
     LoadDecrement(Value, Value),
     Increment(Register8),
     // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
@@ -128,10 +128,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(JumpRelative(Condition::NonZero, addr_offset))
         }
         0x21 => {
-            Some(Load16(HL, decode_immediate16(&bytes[offset + 1..])))
+            Some(Load(Value::Register16(HL), decode_immediate16(&bytes[offset + 1..])))
         }
         0x31 => {
-            Some(Load16(SP, decode_immediate16(&bytes[offset + 1..])))
+            Some(Load(Value::Register16(SP), decode_immediate16(&bytes[offset + 1..])))
         }
         0x32 => {
             Some(LoadDecrement(
@@ -160,7 +160,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Nop => 1,
         Xor8(_) => 1,
         Increment(_) => 1,
-        Load16(_, _) => 3,
+        Load(_, _) => 3,
         LoadDecrement(_, _) => 1,
         Bit(_, _) => 2,
         JumpRelative(_, _) => 2,
@@ -199,10 +199,10 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
         }
-        Load16(SP, amount) => {
+        Load(Value::Register16(SP), amount) => {
             cpu.sp = cpu.sp + Wrapping(amount);
         }
-        Load16(HL, amount) => {
+        Load(Value::Register16(HL), amount) => {
             let (low, high) = split_immediate16(amount);
             cpu.h = Wrapping(high);
             cpu.l = Wrapping(low);
@@ -259,7 +259,7 @@ fn step_inc_wraps() {
 fn decode_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load16(SP, 0xFFFE));
+    assert_eq!(instr, Load(Value::Register16(SP), 0xFFFE));
 }
 
 // Regression test.
@@ -267,7 +267,7 @@ fn decode_sp_immediate() {
 fn decode_sp_immediate_arbtirary_offset() {
     let bytes = [0xAF, 0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 1).unwrap();
-    assert_eq!(instr, Load16(SP, 0xFFFE));
+    assert_eq!(instr, Load(Value::Register16(SP), 0xFFFE));
 }
 
 #[test]
@@ -300,7 +300,7 @@ fn step_xor_a() {
 fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load16(HL, 0x9FFF));
+    assert_eq!(instr, Load(Value::Register16(HL), 0x9FFF));
 }
 
 #[test]
