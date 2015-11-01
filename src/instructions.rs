@@ -203,14 +203,6 @@ fn decode_immediate16(bytes: &[u8]) -> Value {
     Value::Immediate16((high_byte << 8) + low_byte)
 }
 
-/// Separate immediate into high and low bytes.
-fn split_immediate16(i: u16) -> (u8, u8) {
-    let low_byte = i & 0x00FF;
-    let high_byte = i & 0xFF00;
-
-    (low_byte as u8, (high_byte >> 8) as u8)
-}
-
 pub fn step(cpu: &mut CPU, i: Instruction) {
     cpu.pc += 1;
     cpu.m = Wrapping(1);
