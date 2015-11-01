@@ -45,6 +45,7 @@ pub enum Value {
     Register16(Register16),
     Register8(Register8),
     MemoryAddress(Register16),
+    Immediate16(u16),
 }
 
 #[derive(Debug,PartialEq,Eq)]
@@ -65,7 +66,7 @@ pub enum Condition {
 pub enum Instruction {
     Nop,
     Xor8(Register8),
-    Load(Value, u16),
+    Load(Value, Value),
     LoadDecrement(Value, Value),
     Increment(Register8),
     // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
@@ -168,11 +169,11 @@ pub fn instr_size(instr: &Instruction) -> usize {
 }
 
 /// Decode little-endian bytes as a 16-bit integer.
-fn decode_immediate16(bytes: &[u8]) -> u16 {
+fn decode_immediate16(bytes: &[u8]) -> Value {
     let low_byte = bytes[0] as u16;
     let high_byte = bytes[1] as u16;
 
-    (high_byte << 8) + low_byte
+    Value::Immediate16((high_byte << 8) + low_byte)
 }
 
 /// Separate immediate into high and low bytes.
@@ -198,14 +199,6 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             // TODO: flags
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
-        }
-        Load(Value::Register16(SP), amount) => {
-            cpu.sp = cpu.sp + Wrapping(amount);
-        }
-        Load(Value::Register16(HL), amount) => {
-            let (low, high) = split_immediate16(amount);
-            cpu.h = Wrapping(high);
-            cpu.l = Wrapping(low);
         }
         _ => unimplemented!()
     }
@@ -259,7 +252,8 @@ fn step_inc_wraps() {
 fn decode_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load(Value::Register16(SP), 0xFFFE));
+    assert_eq!(instr, Load(Value::Register16(SP),
+                           Value::Immediate16(0xFFFE)));
 }
 
 // Regression test.
@@ -267,16 +261,8 @@ fn decode_sp_immediate() {
 fn decode_sp_immediate_arbtirary_offset() {
     let bytes = [0xAF, 0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 1).unwrap();
-    assert_eq!(instr, Load(Value::Register16(SP), 0xFFFE));
-}
-
-#[test]
-fn load_sp_immediate() {
-    let bytes = [0x31, 0xFE, 0xFF];
-    let mut cpu = initial_cpu();
-
-    step(&mut cpu, decode(&bytes, 0).unwrap());
-    assert_eq!(cpu.sp, Wrapping(0xFFFE));
+    assert_eq!(instr, Load(Value::Register16(SP),
+                           Value::Immediate16(0xFFFE)));
 }
 
 #[test]
@@ -300,17 +286,8 @@ fn step_xor_a() {
 fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load(Value::Register16(HL), 0x9FFF));
-}
-
-#[test]
-fn execute_ld_hl() {
-    let bytes = [0x21, 0xFF, 0x9F];
-    let mut cpu = initial_cpu();
-
-    step(&mut cpu, decode(&bytes, 0).unwrap());
-    assert_eq!(cpu.h, Wrapping(0x9F));
-    assert_eq!(cpu.l, Wrapping(0xFF));
+    assert_eq!(instr, Load(Value::Register16(HL),
+                           Value::Immediate16(0x9FFF)));
 }
 
 #[test]
