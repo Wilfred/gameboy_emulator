@@ -46,6 +46,7 @@ pub enum Value {
     Register16(Register16),
     Register8(Register8),
     MemoryAddress(Register16),
+    MemoryAddressWithOffset(Register8, u16),
     Immediate16(u16),
     Immediate8(u8),
 }
@@ -61,6 +62,9 @@ impl fmt::Debug for Value {
             }
             Value::MemoryAddress(ref r) => {
                 write!(f, "({:?})", r)
+            }
+            Value::MemoryAddressWithOffset(ref r, offset) => {
+                write!(f, "(${:X}+{:?})", offset, r)
             }
             Value::Immediate16(v) => {
                 write!(f, "${:X}", v)
@@ -181,6 +185,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                 _ => unimplemented!()
             }
         }
+        0xE2 => {
+            Some(Load(Value::MemoryAddressWithOffset(C, 0xFF00),
+                      Value::Register8(A)))
+        }
         _ => None
     }
 }
@@ -191,8 +199,9 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Nop => 1,
         Xor8(_) => 1,
         Increment(_) => 1,
-        Load(ref reg, _) => {
-            match *reg {
+        Load(ref target, _) => {
+            match *target {
+                Value::MemoryAddressWithOffset(_, _) => 1,
                 Value::Register8(_) => 2,
                 _ => 3
             }
@@ -360,10 +369,24 @@ fn decode_ld_a() {
 }
 
 #[test]
+fn decode_ld_mem_offset() {
+    let bytes = [0xE2];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, Load(Value::MemoryAddressWithOffset(C, 0xFF00),
+                           Value::Register8(A)));
+}
+
+#[test]
 fn ld_size() {
     let instr = Load(Value::Register8(A), Value::Immediate8(1));
     assert_eq!(instr_size(&instr), 2);
 
     let instr = Load(Value::Register16(HL), Value::Immediate16(1));
     assert_eq!(instr_size(&instr), 3);
+
+    let instr = Load(Value::MemoryAddressWithOffset(C, 0xFF00),
+                     Value::Register8(A));
+    assert_eq!(instr_size(&instr), 1);
+
 }
