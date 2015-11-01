@@ -1,3 +1,4 @@
+use std::fmt;
 use std::num::Wrapping;
 
 use self::Instruction::*;
@@ -40,12 +41,31 @@ pub enum Register8 {
     L,
 }
 
-#[derive(Debug,PartialEq,Eq)]
+#[derive(PartialEq,Eq)]
 pub enum Value {
     Register16(Register16),
     Register8(Register8),
     MemoryAddress(Register16),
     Immediate16(u16),
+}
+
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Value::Register16(ref r) => {
+                write!(f, "{:?}", r)
+            }
+            Value::Register8(ref r) => {
+                write!(f, "{:?}", r)
+            }
+            Value::MemoryAddress(ref r) => {
+                write!(f, "({:?})", r)
+            }
+            Value::Immediate16(v) => {
+                write!(f, "{:?}", v)
+            }
+        }
+    }
 }
 
 #[derive(Debug,PartialEq,Eq)]
