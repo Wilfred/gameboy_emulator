@@ -128,10 +128,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(JumpRelative(Condition::NonZero, addr_offset))
         }
         0x21 => {
-            Some(Load16(HL, decode_immediate16(&bytes[1..])))
+            Some(Load16(HL, decode_immediate16(&bytes[offset + 1..])))
         }
         0x31 => {
-            Some(Load16(SP, decode_immediate16(&bytes[1..])))
+            Some(Load16(SP, decode_immediate16(&bytes[offset + 1..])))
         }
         0x32 => {
             Some(LoadDecrement(
@@ -259,6 +259,14 @@ fn step_inc_wraps() {
 fn decode_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 0).unwrap();
+    assert_eq!(instr, Load16(SP, 0xFFFE));
+}
+
+// Regression test.
+#[test]
+fn decode_sp_immediate_arbtirary_offset() {
+    let bytes = [0xAF, 0x31, 0xFE, 0xFF];
+    let instr = decode(&bytes, 1).unwrap();
     assert_eq!(instr, Load16(SP, 0xFFFE));
 }
 
