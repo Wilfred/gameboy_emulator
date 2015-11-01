@@ -41,17 +41,27 @@ pub enum Register8 {
 }
 
 #[derive(Debug,PartialEq,Eq)]
+pub enum Value {
+    Register16(Register16),
+    Register8(Register8),
+    MemoryAddress(Register16),
+}
+
+#[derive(Debug,PartialEq,Eq)]
 pub enum Register16 {
     // TODO: BC, DE, (HL), SP
     HL,
     SP,
 }
 
+// The main enum for Z80 instructions. Note that we assume intel
+// conventions, so the destination comes *before* the source.
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
     Xor8(Register8),
     Load16(Register16, u16),
+    LoadDecrement(Value, Value),
     Increment(Register8),
 }
 
@@ -111,6 +121,11 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x31 => {
             Some(Load16(SP, decode_immediate16(&bytes[1..])))
         }
+        0x32 => {
+            Some(LoadDecrement(
+                Value::MemoryAddress(HL),
+                Value::Register8(A)))
+        }
         0xAF => {
             Some(Xor8(A))
         }
@@ -125,6 +140,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Xor8(_) => 1,
         Increment(_) => 1,
         Load16(_, _) => 3,
+        LoadDecrement(_, _) => 1,
     }
 }
 
@@ -168,6 +184,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             cpu.h = Wrapping(high);
             cpu.l = Wrapping(low);
         }
+        _ => unimplemented!()
     }
 }
 
@@ -263,4 +280,14 @@ fn execute_ld_hl() {
     step(&mut cpu, decode(&bytes, 0).unwrap());
     assert_eq!(cpu.h, Wrapping(0x9F));
     assert_eq!(cpu.l, Wrapping(0xFF));
+}
+
+#[test]
+fn decode_ldd_hl_a() {
+    let bytes = [0x32];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, LoadDecrement(
+        Value::MemoryAddress(HL),
+        Value::Register8(A)));
 }
