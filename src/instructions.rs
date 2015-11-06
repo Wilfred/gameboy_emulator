@@ -153,6 +153,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x00 => {
             Some(Nop)
         }
+        0x04 => {
+            Some(Increment(B))
+        }
         0x0C => {
             Some(Increment(C))
         }
@@ -173,6 +176,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(LoadDecrement(
                 Value::MemoryAddress(HL),
                 Value::Register8(A)))
+        }
+        0x3C => {
+            Some(Increment(A))
         }
         0x3E => {
             Some(Load(Value::Register8(A), Value::Immediate8(bytes[offset + 1])))
