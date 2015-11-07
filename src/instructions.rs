@@ -78,7 +78,8 @@ impl fmt::Debug for Value {
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum Register16 {
-    // TODO: BC, DE, (HL), SP
+    BC,
+    DE,
     HL,
     SP,
 }
@@ -153,6 +154,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x00 => {
             Some(Nop)
         }
+        0x03 => {
+            Some(Increment(Value::Register16(BC)))
+        }
         0x04 => {
             Some(Increment(Value::Register8(B)))
         }
@@ -161,6 +165,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         }
         0x0E => {
             Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
+        }
+        0x13 => {
+            Some(Increment(Value::Register16(DE)))
         }
         0x14 => {
             Some(Increment(Value::Register8(D)))
@@ -175,6 +182,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x21 => {
             Some(Load(Value::Register16(HL), decode_immediate16(&bytes[offset + 1..])))
         }
+        0x23 => {
+            Some(Increment(Value::Register16(HL)))
+        }
         0x24 => {
             Some(Increment(Value::Register8(H)))
         }
@@ -188,6 +198,12 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(LoadDecrement(
                 Value::MemoryAddress(HL),
                 Value::Register8(A)))
+        }
+        0x33 => {
+            Some(Increment(Value::Register16(SP)))
+        }
+        0x34 => {
+            Some(Increment(Value::MemoryAddress(HL)))
         }
         0x3C => {
             Some(Increment(Value::Register8(A)))
@@ -223,8 +239,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
     match *instr {
         Nop => 1,
         Xor8(_) => 1,
-        Increment(Value::Register8(_)) => 1,
-        Increment(_) => unimplemented!(),
+        Increment(_) => 1,
         Load(_, ref src) => {
             match *src {
                 Value::Immediate16(_) => 3,
