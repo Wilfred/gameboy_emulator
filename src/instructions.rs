@@ -94,7 +94,7 @@ pub enum Condition {
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
-    Xor(Register8),
+    Xor(Value),
     Load(Value, Value),
     LoadDecrement(Value, Value),
     Increment(Value),
@@ -252,25 +252,28 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Value::MemoryAddress(HL), Value::Register8(A)))
         }
         0xA8 => {
-            Some(Xor(B))
+            Some(Xor(Value::Register8(B)))
         }
         0xA9 => {
-            Some(Xor(C))
+            Some(Xor(Value::Register8(C)))
         }
         0xAA => {
-            Some(Xor(D))
+            Some(Xor(Value::Register8(D)))
         }
         0xAB => {
-            Some(Xor(E))
+            Some(Xor(Value::Register8(E)))
         }
         0xAC => {
-            Some(Xor(H))
+            Some(Xor(Value::Register8(H)))
         }
         0xAD => {
-            Some(Xor(L))
+            Some(Xor(Value::Register8(L)))
+        }
+        0xAE => {
+            Some(Xor(Value::MemoryAddress(HL)))
         }
         0xAF => {
-            Some(Xor(A))
+            Some(Xor(Value::Register8(A)))
         }
         // 0xCB is the prefix for two byte instructions.
         0xCB => {
@@ -285,6 +288,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Value::MemoryAddressWithOffset(C, 0xFF00),
                       Value::Register8(A)))
         }
+        0xEE => {
+            Some(Xor(Value::Immediate8(bytes[offset + 1])))
+        }
         _ => None
     }
 }
@@ -293,6 +299,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
 pub fn instr_size(instr: &Instruction) -> usize {
     match *instr {
         Nop => 1,
+        Xor(Value::Immediate8(_)) => 2,
         Xor(_) => 1,
         Increment(_) => 1,
         Decrement(_) => 1,
@@ -324,7 +331,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
 
     match i {
         Nop => {}
-        Xor(register_name) => {
+        Xor(Value::Register8(register_name)) => {
             let register_value = *register8(cpu, register_name);
             cpu.a = cpu.a ^ register_value;
         }
@@ -402,7 +409,23 @@ fn decode_sp_immediate_arbtirary_offset() {
 fn decode_xor() {
     let bytes = [0xAF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Xor(A));
+    assert_eq!(instr, Xor(Value::Register8(A)));
+}
+
+#[test]
+fn decode_xor_immediate() {
+    let bytes = [0xEE, 0xFF];
+    let instr = decode(&bytes, 0).unwrap();
+    assert_eq!(instr, Xor(Value::Immediate8(0xFF)));
+}
+
+#[test]
+fn xor_size() {
+    let instr = Xor(Value::Immediate8(0xFF));
+    assert_eq!(instr_size(&instr), 2);
+
+    let instr = Xor(Value::MemoryAddress(HL));
+    assert_eq!(instr_size(&instr), 1);
 }
 
 #[test]
