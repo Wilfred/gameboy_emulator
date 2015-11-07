@@ -94,6 +94,8 @@ pub enum Condition {
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
+    Stop,
+    Halt,
     Or(Value),
     Xor(Value),
     Load(Value, Value),
@@ -177,6 +179,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x0E => {
             Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
         }
+        0x10 => {
+            Some(Stop)
+        }
         0x13 => {
             Some(Increment(Value::Register16(DE)))
         }
@@ -248,6 +253,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         }
         0x3E => {
             Some(Load(Value::Register8(A), Value::Immediate8(bytes[offset + 1])))
+        }
+        0x76 => {
+            Some(Halt)
         }
         0x77 => {
             Some(Load(Value::MemoryAddress(HL), Value::Register8(A)))
@@ -327,6 +335,8 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
 pub fn instr_size(instr: &Instruction) -> usize {
     match *instr {
         Nop => 1,
+        Stop => 1,
+        Halt => 1,
         Or(Value::Immediate8(_)) => 2,
         Or(_) => 1,
         Xor(Value::Immediate8(_)) => 2,
