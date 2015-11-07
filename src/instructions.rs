@@ -162,12 +162,24 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x0E => {
             Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
         }
+        0x14 => {
+            Some(Increment(D))
+        }
+        0x1E => {
+            Some(Increment(E))
+        }
         0x20 => {
             let addr_offset = bytes[offset+1] as i8;
             Some(JumpRelative(Condition::NonZero, addr_offset))
         }
         0x21 => {
             Some(Load(Value::Register16(HL), decode_immediate16(&bytes[offset + 1..])))
+        }
+        0x24 => {
+            Some(Increment(H))
+        }
+        0x2C => {
+            Some(Increment(L))
         }
         0x31 => {
             Some(Load(Value::Register16(SP), decode_immediate16(&bytes[offset + 1..])))
