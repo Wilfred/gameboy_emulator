@@ -94,6 +94,7 @@ pub enum Condition {
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
+    Or(Value),
     Xor(Value),
     Load(Value, Value),
     LoadDecrement(Value, Value),
@@ -275,6 +276,30 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0xAF => {
             Some(Xor(Value::Register8(A)))
         }
+        0xB0 => {
+            Some(Or(Value::Register8(B)))
+        }
+        0xB1 => {
+            Some(Or(Value::Register8(C)))
+        }
+        0xB2 => {
+            Some(Or(Value::Register8(D)))
+        }
+        0xB3 => {
+            Some(Or(Value::Register8(E)))
+        }
+        0xB4 => {
+            Some(Or(Value::Register8(H)))
+        }
+        0xB5 => {
+            Some(Or(Value::Register8(L)))
+        }
+        0xB6 => {
+            Some(Or(Value::MemoryAddress(HL)))
+        }
+        0xB7 => {
+            Some(Or(Value::Register8(A)))
+        }
         // 0xCB is the prefix for two byte instructions.
         0xCB => {
             match bytes[offset+1] {
@@ -291,6 +316,9 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0xEE => {
             Some(Xor(Value::Immediate8(bytes[offset + 1])))
         }
+        0xF6 => {
+            Some(Or(Value::Immediate8(bytes[offset + 1])))
+        }
         _ => None
     }
 }
@@ -299,6 +327,8 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
 pub fn instr_size(instr: &Instruction) -> usize {
     match *instr {
         Nop => 1,
+        Or(Value::Immediate8(_)) => 2,
+        Or(_) => 1,
         Xor(Value::Immediate8(_)) => 2,
         Xor(_) => 1,
         Increment(_) => 1,
@@ -403,6 +433,13 @@ fn decode_sp_immediate_arbtirary_offset() {
     let instr = decode(&bytes, 1).unwrap();
     assert_eq!(instr, Load(Value::Register16(SP),
                            Value::Immediate16(0xFFFE)));
+}
+
+#[test]
+fn decode_or() {
+    let bytes = [0xB0];
+    let instr = decode(&bytes, 0).unwrap();
+    assert_eq!(instr, Or(Value::Register8(B)));
 }
 
 #[test]
