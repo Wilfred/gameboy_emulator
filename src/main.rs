@@ -65,8 +65,8 @@ fn print_opcodes_implemented() {
         }
     }
 
-    println!("Implemented {} of {} instructions ({}%)",
-             implemented, total, implemented / total);
+    println!("Implemented {} of {} instructions ({:.1}%)",
+             implemented, total, 100.0 * implemented as f64 / total as f64);
 }
 
 #[cfg_attr(test, allow(dead_code))]
