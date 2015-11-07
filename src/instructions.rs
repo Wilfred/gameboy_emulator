@@ -96,7 +96,7 @@ pub enum Instruction {
     Xor8(Register8),
     Load(Value, Value),
     LoadDecrement(Value, Value),
-    Increment(Register8),
+    Increment(Value),
     // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
     Bit(u8, Value),
     JumpRelative(Condition, i8),
@@ -154,19 +154,19 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Nop)
         }
         0x04 => {
-            Some(Increment(B))
+            Some(Increment(Value::Register8(B)))
         }
         0x0C => {
-            Some(Increment(C))
+            Some(Increment(Value::Register8(C)))
         }
         0x0E => {
             Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
         }
         0x14 => {
-            Some(Increment(D))
+            Some(Increment(Value::Register8(D)))
         }
         0x1E => {
-            Some(Increment(E))
+            Some(Increment(Value::Register8(E)))
         }
         0x20 => {
             let addr_offset = bytes[offset+1] as i8;
@@ -176,10 +176,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Value::Register16(HL), decode_immediate16(&bytes[offset + 1..])))
         }
         0x24 => {
-            Some(Increment(H))
+            Some(Increment(Value::Register8(H)))
         }
         0x2C => {
-            Some(Increment(L))
+            Some(Increment(Value::Register8(L)))
         }
         0x31 => {
             Some(Load(Value::Register16(SP), decode_immediate16(&bytes[offset + 1..])))
@@ -190,7 +190,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                 Value::Register8(A)))
         }
         0x3C => {
-            Some(Increment(A))
+            Some(Increment(Value::Register8(A)))
         }
         0x3E => {
             Some(Load(Value::Register8(A), Value::Immediate8(bytes[offset + 1])))
@@ -223,7 +223,8 @@ pub fn instr_size(instr: &Instruction) -> usize {
     match *instr {
         Nop => 1,
         Xor8(_) => 1,
-        Increment(_) => 1,
+        Increment(Value::Register8(_)) => 1,
+        Increment(_) => unimplemented!(),
         Load(_, ref src) => {
             match *src {
                 Value::Immediate16(_) => 3,
@@ -256,7 +257,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             let register_value = *register8(cpu, register_name);
             cpu.a = cpu.a ^ register_value;
         }
-        Increment(target) => {
+        Increment(Value::Register8(target)) => {
             // TODO: flags
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
@@ -292,7 +293,7 @@ fn step_nop() {
 fn step_inc() {
     let mut cpu = initial_cpu();
 
-    step(&mut cpu, Increment(A));
+    step(&mut cpu, Increment(Value::Register8(A)));
     assert_eq!(cpu.pc, 1);
     assert_eq!(cpu.m, Wrapping(1));
     assert_eq!(cpu.t, Wrapping(4));
@@ -305,7 +306,7 @@ fn step_inc_wraps() {
     let mut cpu = initial_cpu();
     cpu.a = Wrapping(255);
 
-    step(&mut cpu, Increment(A));
+    step(&mut cpu, Increment(Value::Register8(A)));
     assert_eq!(cpu.a, Wrapping(0));
 }
 
@@ -407,7 +408,7 @@ fn decode_inc_c() {
     let bytes = [0x0C];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Increment(C));
+    assert_eq!(instr, Increment(Value::Register8(C)));
 }
 
 #[test]
