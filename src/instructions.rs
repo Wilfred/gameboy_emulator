@@ -94,7 +94,7 @@ pub enum Condition {
 #[derive(Debug,PartialEq,Eq)]
 pub enum Instruction {
     Nop,
-    Xor8(Register8),
+    Xor(Register8),
     Load(Value, Value),
     LoadDecrement(Value, Value),
     Increment(Value),
@@ -252,7 +252,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Value::MemoryAddress(HL), Value::Register8(A)))
         }
         0xAF => {
-            Some(Xor8(A))
+            Some(Xor(A))
         }
         // 0xCB is the prefix for two byte instructions.
         0xCB => {
@@ -275,7 +275,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
 pub fn instr_size(instr: &Instruction) -> usize {
     match *instr {
         Nop => 1,
-        Xor8(_) => 1,
+        Xor(_) => 1,
         Increment(_) => 1,
         Decrement(_) => 1,
         Load(_, ref src) => {
@@ -306,7 +306,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
 
     match i {
         Nop => {}
-        Xor8(register_name) => {
+        Xor(register_name) => {
             let register_value = *register8(cpu, register_name);
             cpu.a = cpu.a ^ register_value;
         }
@@ -384,7 +384,7 @@ fn decode_sp_immediate_arbtirary_offset() {
 fn decode_xor() {
     let bytes = [0xAF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Xor8(A));
+    assert_eq!(instr, Xor(A));
 }
 
 #[test]
