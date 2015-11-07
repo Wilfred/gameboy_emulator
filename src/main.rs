@@ -34,7 +34,7 @@ fn print_instrs(bytes: &[u8]) {
             &None => "???".to_owned()
         };
 
-        println!("{:04X}   {} {}", offset, bytes_repr, instr_repr);
+        println!("  {:04X} {} {}", offset, bytes_repr, instr_repr);
         offset += byte_count;
     }
 }
