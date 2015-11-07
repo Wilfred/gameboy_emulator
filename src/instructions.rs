@@ -195,7 +195,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                 0x7C => {
                     Some(Bit(7, Value::Register8(H)))
                 }
-                _ => unimplemented!()
+                _ => None
             }
         }
         0xE2 => {

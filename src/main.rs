@@ -39,12 +39,48 @@ fn print_instrs(bytes: &[u8]) {
     }
 }
 
+fn print_opcodes_implemented() {
+    let mut implemented = 0;
+    let mut total = 0;
+    for byte1 in (0..256u16) {
+        
+        if byte1 == 0xCB {
+            for byte2 in (0..256u16) {
+                let example_sequence = [byte1 as u8, byte2 as u8, 0, 0];
+
+                if decode(&example_sequence, 0).is_some() {
+                    implemented += 1;
+                }
+
+                total += 1;
+            }
+        } else {
+            let example_sequence = [byte1 as u8, 0, 0];
+
+            if decode(&example_sequence, 0).is_some() {
+                implemented += 1;
+            }
+            
+            total += 1;
+        }
+    }
+
+    println!("Implemented {} of {} instructions ({}%)",
+             implemented, total, implemented / total);
+}
+
 #[cfg_attr(test, allow(dead_code))]
 fn main() {
     let args: Vec<_> = env::args().collect();
 
     if args.len() == 2 {
         let path = &args[1];
+
+        if path == "--implemented" {
+            print_opcodes_implemented();
+            return;
+        }
+        
         match read_bytes(path) {
             Ok(bytes) => {
                 print_instrs(&bytes[..]);
