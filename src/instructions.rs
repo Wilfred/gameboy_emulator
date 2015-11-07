@@ -98,6 +98,7 @@ pub enum Instruction {
     Load(Value, Value),
     LoadDecrement(Value, Value),
     Increment(Value),
+    Decrement(Value),
     // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
     Bit(u8, Value),
     JumpRelative(Condition, i8),
@@ -160,8 +161,17 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x04 => {
             Some(Increment(Value::Register8(B)))
         }
+        0x05 => {
+            Some(Decrement(Value::Register8(B)))
+        }
+        0x0B => {
+            Some(Decrement(Value::Register16(BC)))
+        }
         0x0C => {
             Some(Increment(Value::Register8(C)))
+        }
+        0x0D => {
+            Some(Decrement(Value::Register8(C)))
         }
         0x0E => {
             Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
@@ -172,8 +182,17 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x14 => {
             Some(Increment(Value::Register8(D)))
         }
-        0x1E => {
+        0x15 => {
+            Some(Decrement(Value::Register8(D)))
+        }
+        0x1B => {
+            Some(Decrement(Value::Register16(DE)))
+        }
+        0x1C => {
             Some(Increment(Value::Register8(E)))
+        }
+        0x1D => {
+            Some(Decrement(Value::Register8(E)))
         }
         0x20 => {
             let addr_offset = bytes[offset+1] as i8;
@@ -188,8 +207,17 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x24 => {
             Some(Increment(Value::Register8(H)))
         }
+        0x25 => {
+            Some(Decrement(Value::Register8(H)))
+        }
+        0x2B => {
+            Some(Decrement(Value::Register16(HL)))
+        }
         0x2C => {
             Some(Increment(Value::Register8(L)))
+        }
+        0x2D => {
+            Some(Decrement(Value::Register8(L)))
         }
         0x31 => {
             Some(Load(Value::Register16(SP), decode_immediate16(&bytes[offset + 1..])))
@@ -205,8 +233,17 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x34 => {
             Some(Increment(Value::MemoryAddress(HL)))
         }
+        0x35 => {
+            Some(Decrement(Value::MemoryAddress(HL)))
+        }
+        0x3B => {
+            Some(Decrement(Value::Register16(SP)))
+        }
         0x3C => {
             Some(Increment(Value::Register8(A)))
+        }
+        0x3D => {
+            Some(Decrement(Value::Register8(A)))
         }
         0x3E => {
             Some(Load(Value::Register8(A), Value::Immediate8(bytes[offset + 1])))
@@ -240,6 +277,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Nop => 1,
         Xor8(_) => 1,
         Increment(_) => 1,
+        Decrement(_) => 1,
         Load(_, ref src) => {
             match *src {
                 Value::Immediate16(_) => 3,
@@ -424,6 +462,14 @@ fn decode_inc_c() {
     let instr = decode(&bytes, 0).unwrap();
 
     assert_eq!(instr, Increment(Value::Register8(C)));
+}
+
+#[test]
+fn decode_dec() {
+    let bytes = [0x35];
+    let instr = decode(&bytes, 0).unwrap();
+
+    assert_eq!(instr, Decrement(Value::MemoryAddress(HL)));
 }
 
 #[test]
