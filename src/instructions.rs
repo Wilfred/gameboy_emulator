@@ -251,6 +251,24 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x77 => {
             Some(Load(Value::MemoryAddress(HL), Value::Register8(A)))
         }
+        0xA8 => {
+            Some(Xor(B))
+        }
+        0xA9 => {
+            Some(Xor(C))
+        }
+        0xAA => {
+            Some(Xor(D))
+        }
+        0xAB => {
+            Some(Xor(E))
+        }
+        0xAC => {
+            Some(Xor(H))
+        }
+        0xAD => {
+            Some(Xor(L))
+        }
         0xAF => {
             Some(Xor(A))
         }
