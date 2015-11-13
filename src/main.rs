@@ -79,6 +79,13 @@ fn main() {
         if path == "--implemented" {
             print_opcodes_implemented();
             return;
+        } else if path == "--demo" {
+            println!("DEMO MODE");
+            let mut cpu = initial_cpu();
+            println!("Initial CPU state: {:?}", cpu);
+
+            step(&mut cpu, Instruction::Nop);
+            println!("Final CPU state:   {:?}", cpu);
         }
         
         match read_bytes(path) {
@@ -91,11 +98,10 @@ fn main() {
             }
         }
     } else {
-        println!("DEMO MODE");
-        let mut cpu = initial_cpu();
-        println!("Initial CPU state: {:?}", cpu);
-
-        step(&mut cpu, Instruction::Nop);
-        println!("Final CPU state:   {:?}", cpu);
+        println!("Usage:");
+        println!("{} /path/to/rom # disassemble", args[0]);
+        println!("{} --implemented # count opcodes we understand", args[0]);
+        println!("{} --demo # exercise the emulator", args[0]);
+        std::process::exit(1);
     }
 }
