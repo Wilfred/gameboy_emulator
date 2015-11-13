@@ -51,6 +51,13 @@ pub enum Value {
     Immediate8(u8),
 }
 
+#[derive(Debug,PartialEq,Eq)]
+pub enum Operand8 {
+    Register(Register8),
+    MemoryAddress(Register16),
+    Immediate(u8),
+}
+
 impl fmt::Debug for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
@@ -96,7 +103,7 @@ pub enum Instruction {
     Nop,
     Stop,
     Halt,
-    Or(Value),
+    Or(Operand8),
     Xor(Value),
     Load(Value, Value),
     LoadDecrement(Value, Value),
@@ -285,28 +292,28 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Xor(Value::Register8(A)))
         }
         0xB0 => {
-            Some(Or(Value::Register8(B)))
+            Some(Or(Operand8::Register(B)))
         }
         0xB1 => {
-            Some(Or(Value::Register8(C)))
+            Some(Or(Operand8::Register(C)))
         }
         0xB2 => {
-            Some(Or(Value::Register8(D)))
+            Some(Or(Operand8::Register(D)))
         }
         0xB3 => {
-            Some(Or(Value::Register8(E)))
+            Some(Or(Operand8::Register(E)))
         }
         0xB4 => {
-            Some(Or(Value::Register8(H)))
+            Some(Or(Operand8::Register(H)))
         }
         0xB5 => {
-            Some(Or(Value::Register8(L)))
+            Some(Or(Operand8::Register(L)))
         }
         0xB6 => {
-            Some(Or(Value::MemoryAddress(HL)))
+            Some(Or(Operand8::MemoryAddress(HL)))
         }
         0xB7 => {
-            Some(Or(Value::Register8(A)))
+            Some(Or(Operand8::Register(A)))
         }
         // 0xCB is the prefix for two byte instructions.
         0xCB => {
@@ -325,7 +332,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Xor(Value::Immediate8(bytes[offset + 1])))
         }
         0xF6 => {
-            Some(Or(Value::Immediate8(bytes[offset + 1])))
+            Some(Or(Operand8::Immediate(bytes[offset + 1])))
         }
         _ => None
     }
@@ -337,7 +344,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Nop => 1,
         Stop => 1,
         Halt => 1,
-        Or(Value::Immediate8(_)) => 2,
+        Or(Operand8::Immediate(_)) => 2,
         Or(_) => 1,
         Xor(Value::Immediate8(_)) => 2,
         Xor(_) => 1,
@@ -449,7 +456,7 @@ fn decode_sp_immediate_arbtirary_offset() {
 fn decode_or() {
     let bytes = [0xB0];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Or(Value::Register8(B)));
+    assert_eq!(instr, Or(Operand8::Register(B)));
 }
 
 #[test]
