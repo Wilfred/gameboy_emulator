@@ -117,7 +117,7 @@ pub enum Instruction {
     Decrement(Operand8),
     Decrement16(Operand16),
     // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
-    Bit(u8, Value),
+    Bit(u8, Operand8),
     JumpRelative(Condition, i8),
 }
 
@@ -326,7 +326,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0xCB => {
             match bytes[offset+1] {
                 0x7C => {
-                    Some(Bit(7, Value::Register8(H)))
+                    Some(Bit(7, Operand8::Register(H)))
                 }
                 _ => None
             }
@@ -524,7 +524,7 @@ fn decode_bit_7_h() {
     let bytes = [0xCB, 0x7C];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Bit(7, Value::Register8(H)));
+    assert_eq!(instr, Bit(7, Operand8::Register(H)));
 }
 
 #[test]
