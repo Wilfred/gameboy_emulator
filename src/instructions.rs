@@ -1,4 +1,3 @@
-use std::fmt;
 use std::num::Wrapping;
 
 use self::Instruction::*;
@@ -41,51 +40,18 @@ pub enum Register8 {
     L,
 }
 
-#[derive(PartialEq,Eq)]
-pub enum Value {
-    Register16(Register16),
-    Register8(Register8),
-    MemoryAddress(Register16),
-    MemoryAddressWithOffset(Register8, u16),
-    Immediate16(u16),
-    Immediate8(u8),
-}
-
 #[derive(Debug,PartialEq,Eq)]
 pub enum Operand8 {
     Register(Register8),
     MemoryAddress(Register16),
+    MemoryAddressWithOffset(Register8, u16),
     Immediate(u8),
 }
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum Operand16 {
     Register(Register16),
-}
-
-impl fmt::Debug for Value {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Value::Register16(ref r) => {
-                write!(f, "{:?}", r)
-            }
-            Value::Register8(ref r) => {
-                write!(f, "{:?}", r)
-            }
-            Value::MemoryAddress(ref r) => {
-                write!(f, "({:?})", r)
-            }
-            Value::MemoryAddressWithOffset(ref r, offset) => {
-                write!(f, "(${:X}+{:?})", offset, r)
-            }
-            Value::Immediate16(v) => {
-                write!(f, "${:X}", v)
-            }
-            Value::Immediate8(v) => {
-                write!(f, "${:X}", v)
-            }
-        }
-    }
+    Immediate(u16),
 }
 
 #[derive(Debug,PartialEq,Eq)]
@@ -110,7 +76,8 @@ pub enum Instruction {
     Halt,
     Or(Operand8),
     Xor(Operand8),
-    Load(Value, Value),
+    Load(Operand8, Operand8),
+    Load16(Operand16, Operand16),
     LoadDecrement(Operand8, Operand8),
     Increment(Operand8),
     Increment16(Operand16),
@@ -191,7 +158,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Decrement(Operand8::Register(C)))
         }
         0x0E => {
-            Some(Load(Value::Register8(C), Value::Immediate8(bytes[offset + 1])))
+            Some(Load(Operand8::Register(C), Operand8::Immediate(bytes[offset + 1])))
         }
         0x10 => {
             Some(Stop)
@@ -219,7 +186,8 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(JumpRelative(Condition::NonZero, addr_offset))
         }
         0x21 => {
-            Some(Load(Value::Register16(HL), decode_immediate16(&bytes[offset + 1..])))
+            Some(Load16(Operand16::Register(HL),
+                        decode_immediate16(&bytes[offset + 1..])))
         }
         0x23 => {
             Some(Increment16(Operand16::Register(HL)))
@@ -240,7 +208,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Decrement(Operand8::Register(L)))
         }
         0x31 => {
-            Some(Load(Value::Register16(SP), decode_immediate16(&bytes[offset + 1..])))
+            Some(Load16(Operand16::Register(SP), decode_immediate16(&bytes[offset + 1..])))
         }
         0x32 => {
             Some(LoadDecrement(
@@ -266,13 +234,13 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Decrement(Operand8::Register(A)))
         }
         0x3E => {
-            Some(Load(Value::Register8(A), Value::Immediate8(bytes[offset + 1])))
+            Some(Load(Operand8::Register(A), Operand8::Immediate(bytes[offset + 1])))
         }
         0x76 => {
             Some(Halt)
         }
         0x77 => {
-            Some(Load(Value::MemoryAddress(HL), Value::Register8(A)))
+            Some(Load(Operand8::MemoryAddress(HL), Operand8::Register(A)))
         }
         0xA8 => {
             Some(Xor(Operand8::Register(B)))
@@ -332,8 +300,8 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             }
         }
         0xE2 => {
-            Some(Load(Value::MemoryAddressWithOffset(C, 0xFF00),
-                      Value::Register8(A)))
+            Some(Load(Operand8::MemoryAddressWithOffset(C, 0xFF00),
+                      Operand8::Register(A)))
         }
         0xEE => {
             Some(Xor(Operand8::Immediate(bytes[offset + 1])))
@@ -361,8 +329,13 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Decrement16(_) => 1,
         Load(_, ref src) => {
             match *src {
-                Value::Immediate16(_) => 3,
-                Value::Immediate8(_) => 2,
+                Operand8::Immediate(_) => 2,
+                _ => 1
+            }
+        },
+        Load16(_, ref src) => {
+            match *src {
+                Operand16::Immediate(_) => 3,
                 _ => 1
             }
         },
@@ -373,11 +346,11 @@ pub fn instr_size(instr: &Instruction) -> usize {
 }
 
 /// Decode little-endian bytes as a 16-bit integer.
-fn decode_immediate16(bytes: &[u8]) -> Value {
+fn decode_immediate16(bytes: &[u8]) -> Operand16 {
     let low_byte = bytes[0] as u16;
     let high_byte = bytes[1] as u16;
 
-    Value::Immediate16((high_byte << 8) + low_byte)
+    Operand16::Immediate((high_byte << 8) + low_byte)
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) {
@@ -448,8 +421,8 @@ fn step_inc_wraps() {
 fn decode_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load(Value::Register16(SP),
-                           Value::Immediate16(0xFFFE)));
+    assert_eq!(instr, Load16(Operand16::Register(SP),
+                             Operand16::Immediate(0xFFFE)));
 }
 
 // Regression test.
@@ -457,8 +430,8 @@ fn decode_sp_immediate() {
 fn decode_sp_immediate_arbtirary_offset() {
     let bytes = [0xAF, 0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 1).unwrap();
-    assert_eq!(instr, Load(Value::Register16(SP),
-                           Value::Immediate16(0xFFFE)));
+    assert_eq!(instr, Load16(Operand16::Register(SP),
+                           Operand16::Immediate(0xFFFE)));
 }
 
 #[test]
@@ -505,8 +478,8 @@ fn step_xor_a() {
 fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load(Value::Register16(HL),
-                           Value::Immediate16(0x9FFF)));
+    assert_eq!(instr, Load16(Operand16::Register(HL),
+                           Operand16::Immediate(0x9FFF)));
 }
 
 #[test]
@@ -540,7 +513,7 @@ fn decode_ld_c() {
     let bytes = [0x0E, 0x11];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Value::Register8(C), Value::Immediate8(0x11)));
+    assert_eq!(instr, Load(Operand8::Register(C), Operand8::Immediate(0x11)));
 }
 
 #[test]
@@ -548,7 +521,7 @@ fn decode_ld_a() {
     let bytes = [0x3E, 0x80];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Value::Register8(A), Value::Immediate8(0x80)));
+    assert_eq!(instr, Load(Operand8::Register(A), Operand8::Immediate(0x80)));
 }
 
 #[test]
@@ -556,8 +529,8 @@ fn decode_ld_mem_offset() {
     let bytes = [0xE2];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Value::MemoryAddressWithOffset(C, 0xFF00),
-                           Value::Register8(A)));
+    assert_eq!(instr, Load(Operand8::MemoryAddressWithOffset(C, 0xFF00),
+                           Operand8::Register(A)));
 }
 
 #[test]
@@ -581,21 +554,21 @@ fn decode_ld_rel_hl() {
     let bytes = [0x77];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Value::MemoryAddress(HL), Value::Register8(A)));
+    assert_eq!(instr, Load(Operand8::MemoryAddress(HL), Operand8::Register(A)));
 }
 
 #[test]
 fn ld_size() {
-    let instr = Load(Value::Register8(A), Value::Immediate8(1));
+    let instr = Load(Operand8::Register(A), Operand8::Immediate(1));
     assert_eq!(instr_size(&instr), 2);
 
-    let instr = Load(Value::Register16(HL), Value::Immediate16(1));
+    let instr = Load16(Operand16::Register(HL), Operand16::Immediate(1));
     assert_eq!(instr_size(&instr), 3);
 
-    let instr = Load(Value::MemoryAddressWithOffset(C, 0xFF00),
-                     Value::Register8(A));
+    let instr = Load(Operand8::MemoryAddressWithOffset(C, 0xFF00),
+                     Operand8::Register(A));
     assert_eq!(instr_size(&instr), 1);
 
-    let instr = Load(Value::MemoryAddress(HL), Value::Register8(A));
+    let instr = Load(Operand8::MemoryAddress(HL), Operand8::Register(A));
     assert_eq!(instr_size(&instr), 1);
 }
