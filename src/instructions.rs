@@ -293,6 +293,48 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         // 0xCB is the prefix for two byte instructions.
         0xCB => {
             match bytes[offset+1] {
+                0x40 => {
+                    Some(Bit(0, Operand8::Register(B)))
+                }
+                0x41 => {
+                    Some(Bit(0, Operand8::Register(C)))
+                }
+                0x42 => {
+                    Some(Bit(0, Operand8::Register(D)))
+                }
+                0x43 => {
+                    Some(Bit(0, Operand8::Register(E)))
+                }
+                0x44 => {
+                    Some(Bit(0, Operand8::Register(H)))
+                }
+                0x45 => {
+                    Some(Bit(0, Operand8::Register(L)))
+                }
+                0x46 => {
+                    Some(Bit(0, Operand8::MemoryAddress(HL)))
+                }
+                0x50 => {
+                    Some(Bit(2, Operand8::Register(B)))
+                }
+                0x51 => {
+                    Some(Bit(2, Operand8::Register(C)))
+                }
+                0x52 => {
+                    Some(Bit(2, Operand8::Register(D)))
+                }
+                0x53 => {
+                    Some(Bit(2, Operand8::Register(E)))
+                }
+                0x54 => {
+                    Some(Bit(2, Operand8::Register(H)))
+                }
+                0x55 => {
+                    Some(Bit(2, Operand8::Register(L)))
+                }
+                0x56 => {
+                    Some(Bit(2, Operand8::MemoryAddress(HL)))
+                }
                 0x7C => {
                     Some(Bit(7, Operand8::Register(H)))
                 }
