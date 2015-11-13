@@ -104,7 +104,7 @@ pub enum Instruction {
     Stop,
     Halt,
     Or(Operand8),
-    Xor(Value),
+    Xor(Operand8),
     Load(Value, Value),
     LoadDecrement(Value, Value),
     Increment(Value),
@@ -268,28 +268,28 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Value::MemoryAddress(HL), Value::Register8(A)))
         }
         0xA8 => {
-            Some(Xor(Value::Register8(B)))
+            Some(Xor(Operand8::Register(B)))
         }
         0xA9 => {
-            Some(Xor(Value::Register8(C)))
+            Some(Xor(Operand8::Register(C)))
         }
         0xAA => {
-            Some(Xor(Value::Register8(D)))
+            Some(Xor(Operand8::Register(D)))
         }
         0xAB => {
-            Some(Xor(Value::Register8(E)))
+            Some(Xor(Operand8::Register(E)))
         }
         0xAC => {
-            Some(Xor(Value::Register8(H)))
+            Some(Xor(Operand8::Register(H)))
         }
         0xAD => {
-            Some(Xor(Value::Register8(L)))
+            Some(Xor(Operand8::Register(L)))
         }
         0xAE => {
-            Some(Xor(Value::MemoryAddress(HL)))
+            Some(Xor(Operand8::MemoryAddress(HL)))
         }
         0xAF => {
-            Some(Xor(Value::Register8(A)))
+            Some(Xor(Operand8::Register(A)))
         }
         0xB0 => {
             Some(Or(Operand8::Register(B)))
@@ -329,7 +329,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                       Value::Register8(A)))
         }
         0xEE => {
-            Some(Xor(Value::Immediate8(bytes[offset + 1])))
+            Some(Xor(Operand8::Immediate(bytes[offset + 1])))
         }
         0xF6 => {
             Some(Or(Operand8::Immediate(bytes[offset + 1])))
@@ -346,7 +346,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Halt => 1,
         Or(Operand8::Immediate(_)) => 2,
         Or(_) => 1,
-        Xor(Value::Immediate8(_)) => 2,
+        Xor(Operand8::Immediate(_)) => 2,
         Xor(_) => 1,
         Increment(_) => 1,
         Decrement(_) => 1,
@@ -378,7 +378,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
 
     match i {
         Nop => {}
-        Xor(Value::Register8(register_name)) => {
+        Xor(Operand8::Register(register_name)) => {
             let register_value = *register8(cpu, register_name);
             cpu.a = cpu.a ^ register_value;
         }
@@ -463,22 +463,22 @@ fn decode_or() {
 fn decode_xor() {
     let bytes = [0xAF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Xor(Value::Register8(A)));
+    assert_eq!(instr, Xor(Operand8::Register(A)));
 }
 
 #[test]
 fn decode_xor_immediate() {
     let bytes = [0xEE, 0xFF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Xor(Value::Immediate8(0xFF)));
+    assert_eq!(instr, Xor(Operand8::Immediate(0xFF)));
 }
 
 #[test]
 fn xor_size() {
-    let instr = Xor(Value::Immediate8(0xFF));
+    let instr = Xor(Operand8::Immediate(0xFF));
     assert_eq!(instr_size(&instr), 2);
 
-    let instr = Xor(Value::MemoryAddress(HL));
+    let instr = Xor(Operand8::MemoryAddress(HL));
     assert_eq!(instr_size(&instr), 1);
 }
 
