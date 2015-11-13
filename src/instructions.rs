@@ -111,7 +111,7 @@ pub enum Instruction {
     Or(Operand8),
     Xor(Operand8),
     Load(Value, Value),
-    LoadDecrement(Value, Value),
+    LoadDecrement(Operand8, Operand8),
     Increment(Operand8),
     Increment16(Operand16),
     Decrement(Operand8),
@@ -244,8 +244,8 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         }
         0x32 => {
             Some(LoadDecrement(
-                Value::MemoryAddress(HL),
-                Value::Register8(A)))
+                Operand8::MemoryAddress(HL),
+                Operand8::Register(A)))
         }
         0x33 => {
             Some(Increment16(Operand16::Register(SP)))
@@ -515,8 +515,8 @@ fn decode_ldd_hl_a() {
     let instr = decode(&bytes, 0).unwrap();
 
     assert_eq!(instr, LoadDecrement(
-        Value::MemoryAddress(HL),
-        Value::Register8(A)));
+        Operand8::MemoryAddress(HL),
+        Operand8::Register(A)));
 }
 
 #[test]
