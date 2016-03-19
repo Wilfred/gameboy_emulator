@@ -4,9 +4,6 @@ use self::Instruction::*;
 use self::Register8::*;
 use self::Register16::*;
 
-// TODO: this should wrap.
-type ProgramCounter = u16;
-
 #[derive(Debug)]
 pub struct CPU {
     // Generic registers.
@@ -21,7 +18,7 @@ pub struct CPU {
     flags: Wrapping<u8>,
 
     // Program state.
-    pc: ProgramCounter,
+    pc: Wrapping<u16>,
     sp: Wrapping<u16>,
 
     // Clock.
@@ -98,7 +95,7 @@ pub fn initial_cpu() -> CPU {
         h: Wrapping(0),
         l: Wrapping(0),
         flags: Wrapping(0),
-        pc: 0,
+        pc: Wrapping(0),
         sp: Wrapping(0),
         m: Wrapping(0),
         t: Wrapping(0),
@@ -396,7 +393,7 @@ fn decode_immediate16(bytes: &[u8]) -> Operand16 {
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) {
-    cpu.pc += 1;
+    cpu.pc = cpu.pc + Wrapping(1);
     cpu.m = Wrapping(1);
     cpu.t = Wrapping(4);
 
