@@ -136,6 +136,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x00 => {
             Some(Nop)
         }
+        0x01 => {
+            Some(Load16(Operand16::Register(BC),
+                        decode_immediate16(&bytes[offset + 1..])))
+        }
         0x03 => {
             Some(Increment16(Operand16::Register(BC)))
         }
@@ -159,6 +163,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         }
         0x10 => {
             Some(Stop)
+        }
+        0x11 => {
+            Some(Load16(Operand16::Register(DE),
+                        decode_immediate16(&bytes[offset + 1..])))
         }
         0x13 => {
             Some(Increment16(Operand16::Register(DE)))
