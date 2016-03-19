@@ -105,27 +105,13 @@ pub fn initial_cpu() -> CPU {
 // Get a mutable reference to targeted register.
 fn register8(cpu: &mut CPU, target: Register8) -> &mut Wrapping<u8> {
     match target {
-        A => {
-            &mut cpu.a
-        }
-        B => {
-            &mut cpu.b
-        }
-        C => {
-            &mut cpu.c
-        }
-        D => {
-            &mut cpu.d
-        }
-        E => {
-            &mut cpu.e
-        }
-        H => {
-            &mut cpu.h
-        }
-        L => {
-            &mut cpu.l
-        }
+        A => &mut cpu.a,
+        B => &mut cpu.b,
+        C => &mut cpu.c,
+        D => &mut cpu.d,
+        E => &mut cpu.e,
+        H => &mut cpu.h,
+        L => &mut cpu.l,
     }
 }
 
@@ -133,230 +119,107 @@ fn register8(cpu: &mut CPU, target: Register8) -> &mut Wrapping<u8> {
 /// point. Based on http://imrannazar.com/Gameboy-Z80-Opcode-Map .
 pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
     match bytes[offset] {
-        0x00 => {
-            Some(Nop)
-        }
+        0x00 => Some(Nop),
         0x01 => {
             Some(Load16(Operand16::Register(BC),
                         decode_immediate16(&bytes[offset + 1..])))
         }
-        0x03 => {
-            Some(Increment16(Operand16::Register(BC)))
-        }
-        0x04 => {
-            Some(Increment(Operand8::Register(B)))
-        }
-        0x05 => {
-            Some(Decrement(Operand8::Register(B)))
-        }
-        0x0B => {
-            Some(Decrement16(Operand16::Register(BC)))
-        }
-        0x0C => {
-            Some(Increment(Operand8::Register(C)))
-        }
-        0x0D => {
-            Some(Decrement(Operand8::Register(C)))
-        }
+        0x03 => Some(Increment16(Operand16::Register(BC))),
+        0x04 => Some(Increment(Operand8::Register(B))),
+        0x05 => Some(Decrement(Operand8::Register(B))),
+        0x0B => Some(Decrement16(Operand16::Register(BC))),
+        0x0C => Some(Increment(Operand8::Register(C))),
+        0x0D => Some(Decrement(Operand8::Register(C))),
         0x0E => {
-            Some(Load(Operand8::Register(C), Operand8::Immediate(bytes[offset + 1])))
+            Some(Load(Operand8::Register(C),
+                      Operand8::Immediate(bytes[offset + 1])))
         }
-        0x10 => {
-            Some(Stop)
-        }
+        0x10 => Some(Stop),
         0x11 => {
             Some(Load16(Operand16::Register(DE),
                         decode_immediate16(&bytes[offset + 1..])))
         }
-        0x13 => {
-            Some(Increment16(Operand16::Register(DE)))
-        }
-        0x14 => {
-            Some(Increment(Operand8::Register(D)))
-        }
-        0x15 => {
-            Some(Decrement(Operand8::Register(D)))
-        }
-        0x1B => {
-            Some(Decrement16(Operand16::Register(DE)))
-        }
-        0x1C => {
-            Some(Increment(Operand8::Register(E)))
-        }
-        0x1D => {
-            Some(Decrement(Operand8::Register(E)))
-        }
+        0x13 => Some(Increment16(Operand16::Register(DE))),
+        0x14 => Some(Increment(Operand8::Register(D))),
+        0x15 => Some(Decrement(Operand8::Register(D))),
+        0x1B => Some(Decrement16(Operand16::Register(DE))),
+        0x1C => Some(Increment(Operand8::Register(E))),
+        0x1D => Some(Decrement(Operand8::Register(E))),
         0x20 => {
-            let addr_offset = bytes[offset+1] as i8;
+            let addr_offset = bytes[offset + 1] as i8;
             Some(JumpRelative(Condition::NonZero, addr_offset))
         }
         0x21 => {
             Some(Load16(Operand16::Register(HL),
                         decode_immediate16(&bytes[offset + 1..])))
         }
-        0x23 => {
-            Some(Increment16(Operand16::Register(HL)))
-        }
-        0x24 => {
-            Some(Increment(Operand8::Register(H)))
-        }
-        0x25 => {
-            Some(Decrement(Operand8::Register(H)))
-        }
-        0x2B => {
-            Some(Decrement16(Operand16::Register(HL)))
-        }
-        0x2C => {
-            Some(Increment(Operand8::Register(L)))
-        }
-        0x2D => {
-            Some(Decrement(Operand8::Register(L)))
-        }
+        0x23 => Some(Increment16(Operand16::Register(HL))),
+        0x24 => Some(Increment(Operand8::Register(H))),
+        0x25 => Some(Decrement(Operand8::Register(H))),
+        0x2B => Some(Decrement16(Operand16::Register(HL))),
+        0x2C => Some(Increment(Operand8::Register(L))),
+        0x2D => Some(Decrement(Operand8::Register(L))),
         0x31 => {
-            Some(Load16(Operand16::Register(SP), decode_immediate16(&bytes[offset + 1..])))
+            Some(Load16(Operand16::Register(SP),
+                        decode_immediate16(&bytes[offset + 1..])))
         }
-        0x32 => {
-            Some(LoadDecrement(
-                Operand8::MemoryAddress(HL),
-                Operand8::Register(A)))
-        }
-        0x33 => {
-            Some(Increment16(Operand16::Register(SP)))
-        }
-        0x34 => {
-            Some(Increment(Operand8::MemoryAddress(HL)))
-        }
-        0x35 => {
-            Some(Decrement(Operand8::MemoryAddress(HL)))
-        }
-        0x3B => {
-            Some(Decrement16(Operand16::Register(SP)))
-        }
-        0x3C => {
-            Some(Increment(Operand8::Register(A)))
-        }
-        0x3D => {
-            Some(Decrement(Operand8::Register(A)))
-        }
+        0x32 => Some(LoadDecrement(Operand8::MemoryAddress(HL), Operand8::Register(A))),
+        0x33 => Some(Increment16(Operand16::Register(SP))),
+        0x34 => Some(Increment(Operand8::MemoryAddress(HL))),
+        0x35 => Some(Decrement(Operand8::MemoryAddress(HL))),
+        0x3B => Some(Decrement16(Operand16::Register(SP))),
+        0x3C => Some(Increment(Operand8::Register(A))),
+        0x3D => Some(Decrement(Operand8::Register(A))),
         0x3E => {
-            Some(Load(Operand8::Register(A), Operand8::Immediate(bytes[offset + 1])))
+            Some(Load(Operand8::Register(A),
+                      Operand8::Immediate(bytes[offset + 1])))
         }
-        0x76 => {
-            Some(Halt)
-        }
-        0x77 => {
-            Some(Load(Operand8::MemoryAddress(HL), Operand8::Register(A)))
-        }
-        0xA8 => {
-            Some(Xor(Operand8::Register(B)))
-        }
-        0xA9 => {
-            Some(Xor(Operand8::Register(C)))
-        }
-        0xAA => {
-            Some(Xor(Operand8::Register(D)))
-        }
-        0xAB => {
-            Some(Xor(Operand8::Register(E)))
-        }
-        0xAC => {
-            Some(Xor(Operand8::Register(H)))
-        }
-        0xAD => {
-            Some(Xor(Operand8::Register(L)))
-        }
-        0xAE => {
-            Some(Xor(Operand8::MemoryAddress(HL)))
-        }
-        0xAF => {
-            Some(Xor(Operand8::Register(A)))
-        }
-        0xB0 => {
-            Some(Or(Operand8::Register(B)))
-        }
-        0xB1 => {
-            Some(Or(Operand8::Register(C)))
-        }
-        0xB2 => {
-            Some(Or(Operand8::Register(D)))
-        }
-        0xB3 => {
-            Some(Or(Operand8::Register(E)))
-        }
-        0xB4 => {
-            Some(Or(Operand8::Register(H)))
-        }
-        0xB5 => {
-            Some(Or(Operand8::Register(L)))
-        }
-        0xB6 => {
-            Some(Or(Operand8::MemoryAddress(HL)))
-        }
-        0xB7 => {
-            Some(Or(Operand8::Register(A)))
-        }
+        0x76 => Some(Halt),
+        0x77 => Some(Load(Operand8::MemoryAddress(HL), Operand8::Register(A))),
+        0xA8 => Some(Xor(Operand8::Register(B))),
+        0xA9 => Some(Xor(Operand8::Register(C))),
+        0xAA => Some(Xor(Operand8::Register(D))),
+        0xAB => Some(Xor(Operand8::Register(E))),
+        0xAC => Some(Xor(Operand8::Register(H))),
+        0xAD => Some(Xor(Operand8::Register(L))),
+        0xAE => Some(Xor(Operand8::MemoryAddress(HL))),
+        0xAF => Some(Xor(Operand8::Register(A))),
+        0xB0 => Some(Or(Operand8::Register(B))),
+        0xB1 => Some(Or(Operand8::Register(C))),
+        0xB2 => Some(Or(Operand8::Register(D))),
+        0xB3 => Some(Or(Operand8::Register(E))),
+        0xB4 => Some(Or(Operand8::Register(H))),
+        0xB5 => Some(Or(Operand8::Register(L))),
+        0xB6 => Some(Or(Operand8::MemoryAddress(HL))),
+        0xB7 => Some(Or(Operand8::Register(A))),
         // 0xCB is the prefix for two byte instructions.
         0xCB => {
-            match bytes[offset+1] {
-                0x40 => {
-                    Some(Bit(0, Operand8::Register(B)))
-                }
-                0x41 => {
-                    Some(Bit(0, Operand8::Register(C)))
-                }
-                0x42 => {
-                    Some(Bit(0, Operand8::Register(D)))
-                }
-                0x43 => {
-                    Some(Bit(0, Operand8::Register(E)))
-                }
-                0x44 => {
-                    Some(Bit(0, Operand8::Register(H)))
-                }
-                0x45 => {
-                    Some(Bit(0, Operand8::Register(L)))
-                }
-                0x46 => {
-                    Some(Bit(0, Operand8::MemoryAddress(HL)))
-                }
-                0x50 => {
-                    Some(Bit(2, Operand8::Register(B)))
-                }
-                0x51 => {
-                    Some(Bit(2, Operand8::Register(C)))
-                }
-                0x52 => {
-                    Some(Bit(2, Operand8::Register(D)))
-                }
-                0x53 => {
-                    Some(Bit(2, Operand8::Register(E)))
-                }
-                0x54 => {
-                    Some(Bit(2, Operand8::Register(H)))
-                }
-                0x55 => {
-                    Some(Bit(2, Operand8::Register(L)))
-                }
-                0x56 => {
-                    Some(Bit(2, Operand8::MemoryAddress(HL)))
-                }
-                0x7C => {
-                    Some(Bit(7, Operand8::Register(H)))
-                }
-                _ => None
+            match bytes[offset + 1] {
+                0x40 => Some(Bit(0, Operand8::Register(B))),
+                0x41 => Some(Bit(0, Operand8::Register(C))),
+                0x42 => Some(Bit(0, Operand8::Register(D))),
+                0x43 => Some(Bit(0, Operand8::Register(E))),
+                0x44 => Some(Bit(0, Operand8::Register(H))),
+                0x45 => Some(Bit(0, Operand8::Register(L))),
+                0x46 => Some(Bit(0, Operand8::MemoryAddress(HL))),
+                0x50 => Some(Bit(2, Operand8::Register(B))),
+                0x51 => Some(Bit(2, Operand8::Register(C))),
+                0x52 => Some(Bit(2, Operand8::Register(D))),
+                0x53 => Some(Bit(2, Operand8::Register(E))),
+                0x54 => Some(Bit(2, Operand8::Register(H))),
+                0x55 => Some(Bit(2, Operand8::Register(L))),
+                0x56 => Some(Bit(2, Operand8::MemoryAddress(HL))),
+                0x7C => Some(Bit(7, Operand8::Register(H))),
+                _ => None,
             }
         }
         0xE2 => {
             Some(Load(Operand8::MemoryAddressWithOffset(C, 0xFF00),
                       Operand8::Register(A)))
         }
-        0xEE => {
-            Some(Xor(Operand8::Immediate(bytes[offset + 1])))
-        }
-        0xF6 => {
-            Some(Or(Operand8::Immediate(bytes[offset + 1])))
-        }
-        _ => None
+        0xEE => Some(Xor(Operand8::Immediate(bytes[offset + 1]))),
+        0xF6 => Some(Or(Operand8::Immediate(bytes[offset + 1]))),
+        _ => None,
     }
 }
 
@@ -377,15 +240,15 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Load(_, ref src) => {
             match *src {
                 Operand8::Immediate(_) => 2,
-                _ => 1
+                _ => 1,
             }
-        },
+        }
         Load16(_, ref src) => {
             match *src {
                 Operand16::Immediate(_) => 3,
-                _ => 1
+                _ => 1,
             }
-        },
+        }
         LoadDecrement(_, _) => 1,
         Bit(_, _) => 2,
         JumpRelative(_, _) => 2,
@@ -416,7 +279,7 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
         }
-        _ => unimplemented!()
+        _ => unimplemented!(),
     }
 }
 
@@ -468,8 +331,8 @@ fn step_inc_wraps() {
 fn decode_sp_immediate() {
     let bytes = [0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load16(Operand16::Register(SP),
-                             Operand16::Immediate(0xFFFE)));
+    assert_eq!(instr,
+               Load16(Operand16::Register(SP), Operand16::Immediate(0xFFFE)));
 }
 
 // Regression test.
@@ -477,8 +340,8 @@ fn decode_sp_immediate() {
 fn decode_sp_immediate_arbtirary_offset() {
     let bytes = [0xAF, 0x31, 0xFE, 0xFF];
     let instr = decode(&bytes, 1).unwrap();
-    assert_eq!(instr, Load16(Operand16::Register(SP),
-                           Operand16::Immediate(0xFFFE)));
+    assert_eq!(instr,
+               Load16(Operand16::Register(SP), Operand16::Immediate(0xFFFE)));
 }
 
 #[test]
@@ -525,8 +388,8 @@ fn step_xor_a() {
 fn decode_ld_hl() {
     let bytes = [0x21, 0xFF, 0x9F];
     let instr = decode(&bytes, 0).unwrap();
-    assert_eq!(instr, Load16(Operand16::Register(HL),
-                           Operand16::Immediate(0x9FFF)));
+    assert_eq!(instr,
+               Load16(Operand16::Register(HL), Operand16::Immediate(0x9FFF)));
 }
 
 #[test]
@@ -534,9 +397,8 @@ fn decode_ldd_hl_a() {
     let bytes = [0x32];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, LoadDecrement(
-        Operand8::MemoryAddress(HL),
-        Operand8::Register(A)));
+    assert_eq!(instr,
+               LoadDecrement(Operand8::MemoryAddress(HL), Operand8::Register(A)));
 }
 
 #[test]
@@ -560,7 +422,8 @@ fn decode_ld_c() {
     let bytes = [0x0E, 0x11];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Operand8::Register(C), Operand8::Immediate(0x11)));
+    assert_eq!(instr,
+               Load(Operand8::Register(C), Operand8::Immediate(0x11)));
 }
 
 #[test]
@@ -568,7 +431,8 @@ fn decode_ld_a() {
     let bytes = [0x3E, 0x80];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Operand8::Register(A), Operand8::Immediate(0x80)));
+    assert_eq!(instr,
+               Load(Operand8::Register(A), Operand8::Immediate(0x80)));
 }
 
 #[test]
@@ -576,8 +440,9 @@ fn decode_ld_mem_offset() {
     let bytes = [0xE2];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Operand8::MemoryAddressWithOffset(C, 0xFF00),
-                           Operand8::Register(A)));
+    assert_eq!(instr,
+               Load(Operand8::MemoryAddressWithOffset(C, 0xFF00),
+                    Operand8::Register(A)));
 }
 
 #[test]
@@ -601,7 +466,8 @@ fn decode_ld_rel_hl() {
     let bytes = [0x77];
     let instr = decode(&bytes, 0).unwrap();
 
-    assert_eq!(instr, Load(Operand8::MemoryAddress(HL), Operand8::Register(A)));
+    assert_eq!(instr,
+               Load(Operand8::MemoryAddress(HL), Operand8::Register(A)));
 }
 
 #[test]
