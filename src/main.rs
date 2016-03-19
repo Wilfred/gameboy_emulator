@@ -86,15 +86,16 @@ fn main() {
 
             step(&mut cpu, Instruction::Nop);
             println!("Final CPU state:   {:?}", cpu);
-        }
-        
-        match read_bytes(path) {
-            Ok(bytes) => {
-                print_instrs(&bytes[..]);
-            }
-            Err(_) => {
-                println!("Could not read file: {}", path);
-                std::process::exit(1);
+        } else {
+            // Read a file and print disassembly.
+            match read_bytes(path) {
+                Ok(bytes) => {
+                    print_instrs(&bytes[..]);
+                }
+                Err(_) => {
+                    println!("Could not read file: {}", path);
+                    std::process::exit(1);
+                }
             }
         }
     } else {
