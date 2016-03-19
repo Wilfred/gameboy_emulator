@@ -129,6 +129,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x03 => Some(Increment16(Operand16::Register(BC))),
         0x04 => Some(Increment(Operand8::Register(B))),
         0x05 => Some(Decrement(Operand8::Register(B))),
+        0x06 => {
+            Some(Load(Operand8::Register(B),
+                      decode_immediate8(&bytes[offset + 1..])))
+        }
         0x0B => Some(Decrement16(Operand16::Register(BC))),
         0x0C => Some(Increment(Operand8::Register(C))),
         0x0D => Some(Decrement(Operand8::Register(C))),
@@ -145,6 +149,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x13 => Some(Increment16(Operand16::Register(DE))),
         0x14 => Some(Increment(Operand8::Register(D))),
         0x15 => Some(Decrement(Operand8::Register(D))),
+        0x16 => {
+            Some(Load(Operand8::Register(D),
+                      decode_immediate8(&bytes[offset + 1..])))
+        }
         0x1B => Some(Decrement16(Operand16::Register(DE))),
         0x1C => Some(Increment(Operand8::Register(E))),
         0x1D => Some(Decrement(Operand8::Register(E))),
@@ -160,6 +168,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x23 => Some(Increment16(Operand16::Register(HL))),
         0x24 => Some(Increment(Operand8::Register(H))),
         0x25 => Some(Decrement(Operand8::Register(H))),
+        0x26 => {
+            Some(Load(Operand8::Register(H),
+                      decode_immediate8(&bytes[offset + 1..])))
+        }
         0x2B => Some(Decrement16(Operand16::Register(HL))),
         0x2C => Some(Increment(Operand8::Register(L))),
         0x2D => Some(Decrement(Operand8::Register(L))),
@@ -171,6 +183,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         0x33 => Some(Increment16(Operand16::Register(SP))),
         0x34 => Some(Increment(Operand8::MemoryAddress(HL))),
         0x35 => Some(Decrement(Operand8::MemoryAddress(HL))),
+        0x36 => {
+            Some(Load(Operand8::MemoryAddress(HL),
+                      decode_immediate8(&bytes[offset + 1..])))
+        }
         0x3B => Some(Decrement16(Operand16::Register(SP))),
         0x3C => Some(Increment(Operand8::Register(A))),
         0x3D => Some(Decrement(Operand8::Register(A))),
@@ -266,6 +282,11 @@ fn decode_immediate16(bytes: &[u8]) -> Operand16 {
     let high_byte = bytes[1] as u16;
 
     Operand16::Immediate((high_byte << 8) + low_byte)
+}
+
+/// Decode byte as an 8-bit integer.
+fn decode_immediate8(bytes: &[u8]) -> Operand8 {
+    Operand8::Immediate(bytes[0])
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) {
