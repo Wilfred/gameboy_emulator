@@ -49,6 +49,7 @@ pub enum Operand8 {
 pub enum Operand16 {
     Register(Register16),
     Immediate(u16),
+    ConstantMemoryAddress(u16),
 }
 
 #[derive(Debug,PartialEq,Eq)]
@@ -135,6 +136,10 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                       decode_immediate8(&bytes[offset + 1..])))
         }
         0x07 => Some(RotateLeftWithCarry(Operand8::Register(A))),
+        0x08 => {
+            Some(Load16(decode_constant_address(&bytes[offset + 1..]),
+                        Operand16::Register(SP)))
+        }
         0x0B => Some(Decrement16(Operand16::Register(BC))),
         0x0C => Some(Increment(Operand8::Register(C))),
         0x0D => Some(Decrement(Operand8::Register(C))),
@@ -293,6 +298,14 @@ fn decode_immediate16(bytes: &[u8]) -> Operand16 {
     let high_byte = bytes[1] as u16;
 
     Operand16::Immediate((high_byte << 8) + low_byte)
+}
+
+/// Decode little-endian bytes as a 16-bit memory address.
+fn decode_constant_address(bytes: &[u8]) -> Operand16 {
+    let low_byte = bytes[0] as u16;
+    let high_byte = bytes[1] as u16;
+
+    Operand16::ConstantMemoryAddress((high_byte << 8) + low_byte)
 }
 
 /// Decode byte as an 8-bit integer.
