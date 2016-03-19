@@ -75,6 +75,7 @@ pub enum Instruction {
     Xor(Operand8),
     Load(Operand8, Operand8),
     Load16(Operand16, Operand16),
+    LoadIncrement(Operand8, Operand8),
     LoadDecrement(Operand8, Operand8),
     Increment(Operand8),
     Increment16(Operand16),
@@ -124,6 +125,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load16(Operand16::Register(BC),
                         decode_immediate16(&bytes[offset + 1..])))
         }
+        0x02 => Some(Load(Operand8::MemoryAddress(BC), Operand8::Register(A))),
         0x03 => Some(Increment16(Operand16::Register(BC))),
         0x04 => Some(Increment(Operand8::Register(B))),
         0x05 => Some(Decrement(Operand8::Register(B))),
@@ -139,6 +141,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load16(Operand16::Register(DE),
                         decode_immediate16(&bytes[offset + 1..])))
         }
+        0x12 => Some(Load(Operand8::MemoryAddress(DE), Operand8::Register(A))),
         0x13 => Some(Increment16(Operand16::Register(DE))),
         0x14 => Some(Increment(Operand8::Register(D))),
         0x15 => Some(Decrement(Operand8::Register(D))),
@@ -153,6 +156,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load16(Operand16::Register(HL),
                         decode_immediate16(&bytes[offset + 1..])))
         }
+        0x22 => Some(LoadIncrement(Operand8::MemoryAddress(HL), Operand8::Register(A))),
         0x23 => Some(Increment16(Operand16::Register(HL))),
         0x24 => Some(Increment(Operand8::Register(H))),
         0x25 => Some(Decrement(Operand8::Register(H))),
@@ -249,6 +253,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
                 _ => 1,
             }
         }
+        LoadIncrement(_, _) => 1,
         LoadDecrement(_, _) => 1,
         Bit(_, _) => 2,
         JumpRelative(_, _) => 2,
