@@ -306,7 +306,7 @@ fn step_nop() {
     let mut cpu = initial_cpu();
 
     step(&mut cpu, Nop);
-    assert_eq!(cpu.pc, 1);
+    assert_eq!(cpu.pc, Wrapping(1));
     assert_eq!(cpu.m, Wrapping(1));
     assert_eq!(cpu.t, Wrapping(4));
 }
@@ -316,7 +316,7 @@ fn step_inc() {
     let mut cpu = initial_cpu();
 
     step(&mut cpu, Increment(Operand8::Register(A)));
-    assert_eq!(cpu.pc, 1);
+    assert_eq!(cpu.pc, Wrapping(1));
     assert_eq!(cpu.m, Wrapping(1));
     assert_eq!(cpu.t, Wrapping(4));
 
