@@ -30,5 +30,5 @@ $ cargo run /path/to/foo.gb
 Assessing progress:
 
 ```bash
-$ cargo run --implemented
+$ cargo run -- --implemented
 ```
