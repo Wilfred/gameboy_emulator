@@ -42,10 +42,10 @@ fn print_instrs(bytes: &[u8]) {
 fn print_opcodes_implemented() {
     let mut implemented = 0;
     let mut total = 0;
-    for byte1 in (0..256u16) {
+    for byte1 in 0..256u16 {
         
         if byte1 == 0xCB {
-            for byte2 in (0..256u16) {
+            for byte2 in 0..256u16 {
                 let example_sequence = [byte1 as u8, byte2 as u8, 0, 0];
 
                 if decode(&example_sequence, 0).is_some() {
