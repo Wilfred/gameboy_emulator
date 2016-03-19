@@ -72,6 +72,8 @@ pub enum Instruction {
     Nop,
     Stop,
     Halt,
+    Add(Operand8, Operand8),
+    Add16(Operand16, Operand16),
     Or(Operand8),
     Xor(Operand8),
     Load(Operand8, Operand8),
@@ -140,6 +142,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load16(decode_constant_address(&bytes[offset + 1..]),
                         Operand16::Register(SP)))
         }
+        0x09 => Some(Add16(Operand16::Register(HL), Operand16::Register(BC))),
         0x0B => Some(Decrement16(Operand16::Register(BC))),
         0x0C => Some(Increment(Operand8::Register(C))),
         0x0D => Some(Decrement(Operand8::Register(C))),
@@ -160,6 +163,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Operand8::Register(D),
                       decode_immediate8(&bytes[offset + 1..])))
         }
+        0x19 => Some(Add16(Operand16::Register(HL), Operand16::Register(DE))),
         0x1B => Some(Decrement16(Operand16::Register(DE))),
         0x1C => Some(Increment(Operand8::Register(E))),
         0x1D => Some(Decrement(Operand8::Register(E))),
@@ -179,6 +183,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Operand8::Register(H),
                       decode_immediate8(&bytes[offset + 1..])))
         }
+        0x29 => Some(Add16(Operand16::Register(HL), Operand16::Register(HL))),
         0x2B => Some(Decrement16(Operand16::Register(HL))),
         0x2C => Some(Increment(Operand8::Register(L))),
         0x2D => Some(Decrement(Operand8::Register(L))),
@@ -194,6 +199,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Operand8::MemoryAddress(HL),
                       decode_immediate8(&bytes[offset + 1..])))
         }
+        0x39 => Some(Add16(Operand16::Register(HL), Operand16::Register(SP))),
         0x3B => Some(Decrement16(Operand16::Register(SP))),
         0x3C => Some(Increment(Operand8::Register(A))),
         0x3D => Some(Decrement(Operand8::Register(A))),
@@ -203,6 +209,14 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         }
         0x76 => Some(Halt),
         0x77 => Some(Load(Operand8::MemoryAddress(HL), Operand8::Register(A))),
+        0x80 => Some(Add(Operand8::Register(A), Operand8::Register(B))),
+        0x81 => Some(Add(Operand8::Register(A), Operand8::Register(C))),
+        0x82 => Some(Add(Operand8::Register(A), Operand8::Register(D))),
+        0x83 => Some(Add(Operand8::Register(A), Operand8::Register(E))),
+        0x84 => Some(Add(Operand8::Register(A), Operand8::Register(H))),
+        0x85 => Some(Add(Operand8::Register(A), Operand8::Register(L))),
+        0x86 => Some(Add(Operand8::Register(A), Operand8::MemoryAddress(HL))),
+        0x87 => Some(Add(Operand8::Register(A), Operand8::Register(A))),
         0xA8 => Some(Xor(Operand8::Register(B))),
         0xA9 => Some(Xor(Operand8::Register(C))),
         0xAA => Some(Xor(Operand8::Register(D))),
@@ -264,6 +278,8 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Nop => 1,
         Stop => 1,
         Halt => 1,
+        Add(_, _) => 1,
+        Add16(_, _) => 1,
         Or(Operand8::Immediate(_)) => 2,
         Or(_) => 1,
         Xor(Operand8::Immediate(_)) => 2,
