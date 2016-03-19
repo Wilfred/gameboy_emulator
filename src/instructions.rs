@@ -143,6 +143,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                         Operand16::Register(SP)))
         }
         0x09 => Some(Add16(Operand16::Register(HL), Operand16::Register(BC))),
+        0x0A => Some(Load(Operand8::Register(A), Operand8::MemoryAddress(BC))),
         0x0B => Some(Decrement16(Operand16::Register(BC))),
         0x0C => Some(Increment(Operand8::Register(C))),
         0x0D => Some(Decrement(Operand8::Register(C))),
