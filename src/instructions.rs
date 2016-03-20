@@ -85,6 +85,7 @@ pub enum Instruction {
     Decrement(Operand8),
     Decrement16(Operand16),
     RotateLeftWithCarry(Operand8),
+    RotateRightWithCarry(Operand8),
     // First argument is 0-7, annoyingly Rust doesn't have a u3 type.
     Bit(u8, Operand8),
     JumpRelative(Condition, i8),
@@ -151,6 +152,7 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
             Some(Load(Operand8::Register(C),
                       Operand8::Immediate(bytes[offset + 1])))
         }
+        0x0F => Some(RotateRightWithCarry(Operand8::Register(A))),
         0x10 => Some(Stop),
         0x11 => {
             Some(Load16(Operand16::Register(DE),
@@ -245,6 +247,14 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
                 0x05 => Some(RotateLeftWithCarry(Operand8::Register(L))),
                 0x06 => Some(RotateLeftWithCarry(Operand8::MemoryAddress(HL))),
                 0x07 => Some(RotateLeftWithCarry(Operand8::Register(A))),
+                0x08 => Some(RotateRightWithCarry(Operand8::Register(B))),
+                0x09 => Some(RotateRightWithCarry(Operand8::Register(C))),
+                0x0A => Some(RotateRightWithCarry(Operand8::Register(D))),
+                0x0B => Some(RotateRightWithCarry(Operand8::Register(E))),
+                0x0C => Some(RotateRightWithCarry(Operand8::Register(H))),
+                0x0D => Some(RotateRightWithCarry(Operand8::Register(L))),
+                0x0E => Some(RotateRightWithCarry(Operand8::MemoryAddress(HL))),
+                0x0F => Some(RotateRightWithCarry(Operand8::Register(A))),
                 0x40 => Some(Bit(0, Operand8::Register(B))),
                 0x41 => Some(Bit(0, Operand8::Register(C))),
                 0x42 => Some(Bit(0, Operand8::Register(D))),
@@ -290,6 +300,7 @@ pub fn instr_size(instr: &Instruction) -> usize {
         Decrement(_) => 1,
         Decrement16(_) => 1,
         RotateLeftWithCarry(_) => 1,
+        RotateRightWithCarry(_) => 1,
         Load(_, ref src) => {
             match *src {
                 Operand8::Immediate(_) => 2,
