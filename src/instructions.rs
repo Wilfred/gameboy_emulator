@@ -237,14 +237,14 @@ pub fn decode(bytes: &[u8], offset: usize) -> Option<Instruction> {
         // 0xCB is the prefix for two byte instructions.
         0xCB => {
             match bytes[offset + 1] {
-                0x01 => Some(RotateLeftWithCarry(Operand8::Register(B))),
-                0x02 => Some(RotateLeftWithCarry(Operand8::Register(C))),
-                0x03 => Some(RotateLeftWithCarry(Operand8::Register(D))),
-                0x04 => Some(RotateLeftWithCarry(Operand8::Register(E))),
-                0x05 => Some(RotateLeftWithCarry(Operand8::Register(H))),
-                0x06 => Some(RotateLeftWithCarry(Operand8::Register(L))),
-                0x07 => Some(RotateLeftWithCarry(Operand8::MemoryAddress(HL))),
-                0x08 => Some(RotateLeftWithCarry(Operand8::Register(A))),
+                0x00 => Some(RotateLeftWithCarry(Operand8::Register(B))),
+                0x01 => Some(RotateLeftWithCarry(Operand8::Register(C))),
+                0x02 => Some(RotateLeftWithCarry(Operand8::Register(D))),
+                0x03 => Some(RotateLeftWithCarry(Operand8::Register(E))),
+                0x04 => Some(RotateLeftWithCarry(Operand8::Register(H))),
+                0x05 => Some(RotateLeftWithCarry(Operand8::Register(L))),
+                0x06 => Some(RotateLeftWithCarry(Operand8::MemoryAddress(HL))),
+                0x07 => Some(RotateLeftWithCarry(Operand8::Register(A))),
                 0x40 => Some(Bit(0, Operand8::Register(B))),
                 0x41 => Some(Bit(0, Operand8::Register(C))),
                 0x42 => Some(Bit(0, Operand8::Register(D))),
@@ -551,4 +551,11 @@ fn ld_size() {
 
     let instr = Load(Operand8::MemoryAddress(HL), Operand8::Register(A));
     assert_eq!(instr_size(&instr), 1);
+}
+
+#[test]
+fn decode_rrc() {
+    let bytes = [0xCB, 0x00];
+    assert_eq!(decode(&bytes, 0).unwrap(),
+               RotateLeftWithCarry(Operand8::Register(B)));
 }
