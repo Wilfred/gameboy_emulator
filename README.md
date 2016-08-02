@@ -32,3 +32,9 @@ Assessing progress:
 ```bash
 $ cargo run -- --implemented
 ```
+
+Running a ROM (very very alpha):
+
+```bash
+$ cargo run -- --run /path/to/foo.gb
+```

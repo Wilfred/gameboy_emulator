@@ -341,7 +341,7 @@ fn decode_immediate8(bytes: &[u8]) -> Operand8 {
     Operand8::Immediate(bytes[0])
 }
 
-pub fn step(cpu: &mut CPU, i: Instruction) {
+pub fn step(cpu: &mut CPU, i: Instruction) -> Result<(), String> {
     cpu.pc = cpu.pc + Wrapping(1);
     cpu.m = Wrapping(1);
     cpu.t = Wrapping(4);
@@ -357,8 +357,38 @@ pub fn step(cpu: &mut CPU, i: Instruction) {
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
         }
-        _ => unimplemented!(),
+        _ => return Err(format!("Don't know how to execute {:?}", i)),
     }
+
+    Ok(())
+}
+
+pub fn fetch_execute(bytes: &[u8]) -> Result<(), String> {
+    let mut cpu = initial_cpu();
+    
+    let mut offset = 0;
+    while offset < bytes.len() {
+        let instr = decode(bytes, offset);
+
+        match instr {
+            Some(instr) => {
+                let byte_count = instr_size(&instr);
+                try!(step(&mut cpu, instr));
+                
+                offset += byte_count;
+            }
+            None => {
+                return Err(
+                    format!("Could not decode instruction at {} bytes {:02X}",
+                            offset, bytes[offset]));
+            }
+        }
+    }
+
+    // TODO: return the CPU properly.
+    print!("Final CPU state: {:?}", cpu);
+
+    Ok(())
 }
 
 #[test]

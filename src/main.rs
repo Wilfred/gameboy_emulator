@@ -106,6 +106,26 @@ fn main() {
                     std::process::exit(1);
                 }
             }
+        } else if command == "--run" {
+            // Read a file and execute it.
+            match read_bytes(path) {
+                Ok(bytes) => {
+                    match fetch_execute(&bytes[..]) {
+                        Ok(_) => {
+                            println!("Execution terminatd normally.");
+                            return;
+                        }
+                        Err(msg) => {
+                            println!("Failed: {}", msg);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                Err(_) => {
+                    println!("Could not read file: {}", path);
+                    std::process::exit(1);
+                }
+            }
         }
     }
 
