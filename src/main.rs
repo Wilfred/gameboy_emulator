@@ -87,7 +87,14 @@ fn main() {
             step(&mut cpu, Instruction::Nop);
             println!("Final CPU state:   {:?}", cpu);
             return;
-        } else {
+        }
+    }
+
+    if args.len() == 3 {
+        let command = &args[1];
+        let path = &args[2];
+
+        if command == "--dis" {
             // Read a file and print disassembly.
             match read_bytes(path) {
                 Ok(bytes) => {

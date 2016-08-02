@@ -24,7 +24,7 @@ $ cargo build
 Usage as a disassembler:
 
 ```bash
-$ cargo run /path/to/foo.gb
+$ cargo run -- --dis /path/to/foo.gb
 ```
 
 Assessing progress:
