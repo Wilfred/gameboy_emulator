@@ -342,6 +342,9 @@ fn decode_immediate8(bytes: &[u8]) -> Operand8 {
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) -> Result<(), String> {
+    println!("CPU is: {:?}", cpu);
+    println!("Executing: {:?}", i);
+    
     cpu.pc = cpu.pc + Wrapping(1);
     cpu.m = Wrapping(1);
     cpu.t = Wrapping(4);
