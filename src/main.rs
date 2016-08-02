@@ -86,11 +86,13 @@ fn main() {
 
             step(&mut cpu, Instruction::Nop);
             println!("Final CPU state:   {:?}", cpu);
+            return;
         } else {
             // Read a file and print disassembly.
             match read_bytes(path) {
                 Ok(bytes) => {
                     print_instrs(&bytes[..]);
+                    return;
                 }
                 Err(_) => {
                     println!("Could not read file: {}", path);
@@ -98,11 +100,11 @@ fn main() {
                 }
             }
         }
-    } else {
-        println!("Usage:");
-        println!("{} /path/to/rom # disassemble", args[0]);
-        println!("{} --implemented # count opcodes we understand", args[0]);
-        println!("{} --demo # exercise the emulator", args[0]);
-        std::process::exit(1);
     }
+
+    println!("Usage:");
+    println!("{} /path/to/rom # disassemble", args[0]);
+    println!("{} --implemented # count opcodes we understand", args[0]);
+    println!("{} --demo # exercise the emulator", args[0]);
+    std::process::exit(1);
 }
