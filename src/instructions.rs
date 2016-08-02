@@ -360,6 +360,22 @@ pub fn step(cpu: &mut CPU, i: Instruction) -> Result<(), String> {
             let mut reg = register8(cpu, target);
             *reg = *reg + Wrapping(1);
         }
+        Load16(Operand16::Register(target), Operand16::Immediate(value)) => {
+            let upper_bits = (value >> 8) as u8;
+            let lower_bits = (value & 0xF) as u8;
+
+            match target {
+                Register16::SP => {
+                    cpu.sp = Wrapping::<u16>(value);
+                }
+                Register16::HL => {
+                    cpu.h = Wrapping::<u8>(upper_bits);
+                    cpu.l = Wrapping::<u8>(lower_bits);
+                }
+                _ => unimplemented!()
+            }
+            
+        }
         _ => return Err(format!("Don't know how to execute {:?}", i)),
     }
 
