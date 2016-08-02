@@ -1,5 +1,6 @@
 # Gameboy Emulator
 [![Build Status](https://travis-ci.org/Wilfred/gameboy_emulator.svg?branch=master)](https://travis-ci.org/Wilfred/gameboy_emulator)
+[![Coverage Status](https://coveralls.io/repos/github/Wilfred/gameboy_emulator/badge.svg?branch=master)](https://coveralls.io/github/Wilfred/gameboy_emulator?branch=master)
 
 A basic gameboy emulator in Rust. Currently, it's just a disassembler.
 
