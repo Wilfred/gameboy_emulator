@@ -1,10 +1,10 @@
+use std::fmt;
 use std::num::Wrapping;
 
 use self::Instruction::*;
 use self::Register8::*;
 use self::Register16::*;
 
-#[derive(Debug)]
 pub struct CPU {
     // Generic registers.
     a: Wrapping<u8>,
@@ -24,6 +24,23 @@ pub struct CPU {
     // Clock.
     m: Wrapping<u8>,
     t: Wrapping<u8>,
+}
+
+impl fmt::Debug for CPU {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(f, "CPU "));
+        try!(write!(f, "A: {:02X} ", self.a.0));
+        try!(write!(f, "B: {:02X} ", self.b.0));
+        try!(write!(f, "C: {:02X} ", self.c.0));
+        try!(write!(f, "D: {:02X} ", self.d.0));
+        try!(write!(f, "E: {:02X} ", self.e.0));
+        try!(write!(f, "H: {:02X} ", self.h.0));
+        try!(write!(f, "L: {:02X} ", self.l.0));
+        try!(write!(f, "Flags: {:02X} ", self.flags.0));
+        try!(write!(f, "PC: {:02X} ", self.pc.0));
+        try!(write!(f, "SP: {:04X} ", self.sp.0));
+        write!(f, "Clock M:{:02X} T:{:02X}", self.m.0, self.t.0)
+    }
 }
 
 #[derive(Debug,PartialEq,Eq)]
@@ -342,7 +359,7 @@ fn decode_immediate8(bytes: &[u8]) -> Operand8 {
 }
 
 pub fn step(cpu: &mut CPU, i: Instruction) -> Result<(), String> {
-    println!("CPU is: {:?}", cpu);
+    println!("{:?}", cpu);
     println!("Executing: {:?}", i);
     
     cpu.pc = cpu.pc + Wrapping(1);
