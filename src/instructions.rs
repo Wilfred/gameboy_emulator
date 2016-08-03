@@ -24,6 +24,8 @@ pub struct CPU {
     // Clock.
     m: Wrapping<u8>,
     t: Wrapping<u8>,
+
+    memory: [u8; 65536],
 }
 
 impl fmt::Debug for CPU {
@@ -122,6 +124,7 @@ pub fn initial_cpu() -> CPU {
         sp: Wrapping(0),
         m: Wrapping(0),
         t: Wrapping(0),
+        memory: [0; 65536]
     }
 }
 
